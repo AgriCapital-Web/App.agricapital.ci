@@ -88,88 +88,89 @@ serve(async (req) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-            from: 'AgriCapital <notifications@agricapital.ci>',
-            to: [adminProfile.email],
-            subject: '🔔 Nouvelle demande de création de compte - AgriCapital',
-            html: `
-              <!DOCTYPE html>
-              <html>
-              <head>
-                <meta charset="utf-8">
-                <style>
-                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                  .header { background: linear-gradient(135deg, #00643C, #00843C); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-                  .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
-                  .info-row { display: flex; padding: 10px 0; border-bottom: 1px solid #eee; }
-                  .label { font-weight: bold; width: 150px; color: #666; }
-                  .value { flex: 1; }
-                  .footer { text-align: center; padding: 15px; color: #666; font-size: 12px; }
-                  .button { display: inline-block; background: #00643C; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 20px; }
-                </style>
-              </head>
-              <body>
-                <div class="container">
-                  <div class="header">
-                    <h1>🌿 AgriCapital</h1>
-                    <p>Nouvelle demande de compte</p>
+              from: 'AgriCapital <notifications@agricapital.ci>',
+              to: [adminProfile.email],
+              subject: '🔔 Nouvelle demande de création de compte - AgriCapital',
+              html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset="utf-8">
+                  <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background: linear-gradient(135deg, #00643C, #00843C); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                    .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
+                    .info-row { display: flex; padding: 10px 0; border-bottom: 1px solid #eee; }
+                    .label { font-weight: bold; width: 150px; color: #666; }
+                    .value { flex: 1; }
+                    .footer { text-align: center; padding: 15px; color: #666; font-size: 12px; }
+                    .button { display: inline-block; background: #00643C; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+                  </style>
+                </head>
+                <body>
+                  <div class="container">
+                    <div class="header">
+                      <h1>🌿 AgriCapital</h1>
+                      <p>Nouvelle demande de compte</p>
+                    </div>
+                    <div class="content">
+                      <p>Bonjour ${adminProfile.nom_complet},</p>
+                      <p>Une nouvelle demande de création de compte a été soumise sur la plateforme AgriCapital.</p>
+                      
+                      <h3>Détails de la demande :</h3>
+                      <div class="info-row">
+                        <span class="label">Nom complet :</span>
+                        <span class="value">${requestData.nom_complet}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="label">Email :</span>
+                        <span class="value">${requestData.email}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="label">Téléphone :</span>
+                        <span class="value">${requestData.telephone}</span>
+                      </div>
+                      ${requestData.poste ? `
+                      <div class="info-row">
+                        <span class="label">Poste souhaité :</span>
+                        <span class="value">${requestData.poste}</span>
+                      </div>
+                      ` : ''}
+                      ${requestData.region ? `
+                      <div class="info-row">
+                        <span class="label">Région :</span>
+                        <span class="value">${requestData.region}</span>
+                      </div>
+                      ` : ''}
+                      ${requestData.departement ? `
+                      <div class="info-row">
+                        <span class="label">Département :</span>
+                        <span class="value">${requestData.departement}</span>
+                      </div>
+                      ` : ''}
+                      ${requestData.message ? `
+                      <div class="info-row">
+                        <span class="label">Message :</span>
+                        <span class="value">${requestData.message}</span>
+                      </div>
+                      ` : ''}
+                      
+                      <p style="margin-top: 20px;">Connectez-vous à la plateforme pour examiner et traiter cette demande.</p>
+                      
+                      <div style="text-align: center;">
+                        <a href="https://app.agricapital.ci/account-requests" class="button">Voir les demandes</a>
+                      </div>
+                    </div>
+                    <div class="footer">
+                      <p>© 2025 AgriCapital - Tous droits réservés</p>
+                      <p>Ceci est un email automatique, merci de ne pas y répondre.</p>
+                    </div>
                   </div>
-                  <div class="content">
-                    <p>Bonjour ${adminProfile.nom_complet},</p>
-                    <p>Une nouvelle demande de création de compte a été soumise sur la plateforme AgriCapital.</p>
-                    
-                    <h3>Détails de la demande :</h3>
-                    <div class="info-row">
-                      <span class="label">Nom complet :</span>
-                      <span class="value">${requestData.nom_complet}</span>
-                    </div>
-                    <div class="info-row">
-                      <span class="label">Email :</span>
-                      <span class="value">${requestData.email}</span>
-                    </div>
-                    <div class="info-row">
-                      <span class="label">Téléphone :</span>
-                      <span class="value">${requestData.telephone}</span>
-                    </div>
-                    ${requestData.poste ? `
-                    <div class="info-row">
-                      <span class="label">Poste souhaité :</span>
-                      <span class="value">${requestData.poste}</span>
-                    </div>
-                    ` : ''}
-                    ${requestData.region ? `
-                    <div class="info-row">
-                      <span class="label">Région :</span>
-                      <span class="value">${requestData.region}</span>
-                    </div>
-                    ` : ''}
-                    ${requestData.departement ? `
-                    <div class="info-row">
-                      <span class="label">Département :</span>
-                      <span class="value">${requestData.departement}</span>
-                    </div>
-                    ` : ''}
-                    ${requestData.message ? `
-                    <div class="info-row">
-                      <span class="label">Message :</span>
-                      <span class="value">${requestData.message}</span>
-                    </div>
-                    ` : ''}
-                    
-                    <p style="margin-top: 20px;">Connectez-vous à la plateforme pour examiner et traiter cette demande.</p>
-                    
-                    <div style="text-align: center;">
-                      <a href="https://app.agricapital.ci/account-requests" class="button">Voir les demandes</a>
-                    </div>
-                  </div>
-                  <div class="footer">
-                    <p>© 2025 AgriCapital - Tous droits réservés</p>
-                    <p>Ceci est un email automatique, merci de ne pas y répondre.</p>
-                  </div>
-                </div>
-              </body>
-              </html>
-            `
+                </body>
+                </html>
+              `
+            })
           });
 
           console.log("Email sent successfully:", emailResponse);

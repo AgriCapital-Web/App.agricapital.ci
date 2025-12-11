@@ -9,15 +9,18 @@ export const useClientPortal = () => {
 
   useEffect(() => {
     const hostname = window.location.hostname;
-    // Vérifier si c'est le sous-domaine pay ou client
+    // Vérifier si c'est le sous-domaine pay, client ou abonne
     const isPayDomain = 
       hostname === 'pay.agricapital.ci' || 
       hostname === 'client.agricapital.ci' ||
+      hostname === 'abonne.agricapital.ci' ||
       hostname.startsWith('pay.') ||
       hostname.startsWith('client.') ||
-      // Pour le développement local
+      hostname.startsWith('abonne.') ||
+      // Pour le développement local et routes
       window.location.pathname.startsWith('/pay') ||
-      window.location.pathname.startsWith('/client');
+      window.location.pathname.startsWith('/client') ||
+      window.location.pathname.startsWith('/abonne');
     
     setIsClientPortal(isPayDomain);
   }, []);
@@ -33,9 +36,12 @@ export const isOnClientPortal = (): boolean => {
   return (
     hostname === 'pay.agricapital.ci' || 
     hostname === 'client.agricapital.ci' ||
+    hostname === 'abonne.agricapital.ci' ||
     hostname.startsWith('pay.') ||
     hostname.startsWith('client.') ||
+    hostname.startsWith('abonne.') ||
     window.location.pathname.startsWith('/pay') ||
-    window.location.pathname.startsWith('/client')
+    window.location.pathname.startsWith('/client') ||
+    window.location.pathname.startsWith('/abonne')
   );
 };
