@@ -113,10 +113,12 @@ const ClientDashboard = ({
         <Card className="bg-gradient-to-br from-primary to-primary/80 text-white border-0 shadow-xl overflow-hidden">
           <CardContent className="p-5 sm:p-6">
             <div className="flex items-center gap-4">
-              {/* Photo avec bordure stylisée */}
-              <div className="relative">
-                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-white/30 to-accent/50 p-1">
-                  <div className="h-full w-full rounded-full overflow-hidden bg-white">
+              {/* Photo avec bordure stylisée vert-doré */}
+              <div className="relative flex-shrink-0">
+                <div className="relative">
+                  {/* Border gradient effect */}
+                  <div className="absolute -inset-1 bg-gradient-to-br from-white via-transparent to-accent rounded-full"></div>
+                  <div className="relative h-20 w-20 rounded-full overflow-hidden border-4 border-white/30">
                     {souscripteur.photo_profil_url ? (
                       <img 
                         src={souscripteur.photo_profil_url} 
@@ -124,15 +126,17 @@ const ClientDashboard = ({
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="h-full w-full bg-primary/10 flex items-center justify-center">
-                        <User className="h-10 w-10 text-primary" />
+                      <div className="h-full w-full bg-white/20 flex items-center justify-center">
+                        <span className="text-2xl font-bold text-white">
+                          {getInitials(souscripteur.nom_complet)}
+                        </span>
                       </div>
                     )}
                   </div>
                 </div>
-                {/* Decorative corner borders */}
-                <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-xl"></div>
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-accent rounded-br-xl"></div>
+                {/* Decorative corner borders - vert/doré */}
+                <div className="absolute -top-2 -left-2 w-6 h-6 border-t-[3px] border-l-[3px] border-white rounded-tl-xl"></div>
+                <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-[3px] border-r-[3px] border-accent rounded-br-xl"></div>
               </div>
               
               <div className="flex-1 min-w-0">

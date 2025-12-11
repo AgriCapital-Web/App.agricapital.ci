@@ -38,21 +38,41 @@ const queryClient = new QueryClient();
 // Composant pour détecter le domaine et rediriger
 const DomainRouter = () => {
   const [isClientDomain, setIsClientDomain] = useState<boolean | null>(null);
+  const [routeType, setRouteType] = useState<'client' | 'admin' | null>(null);
 
   useEffect(() => {
     const hostname = window.location.hostname;
+    const pathname = window.location.pathname;
+    
     // Vérifier si c'est le sous-domaine pay ou client
     const isPayDomain = 
       hostname === 'pay.agricapital.ci' || 
       hostname === 'client.agricapital.ci' ||
+      hostname === 'abonne.agricapital.ci' ||
       hostname.startsWith('pay.') ||
-      hostname.startsWith('client.');
+      hostname.startsWith('client.') ||
+      hostname.startsWith('abonne.');
     
-    setIsClientDomain(isPayDomain);
+    // Vérifier si c'est une route portail abonné sur le domaine principal
+    const isClientRoute = 
+      pathname.startsWith('/pay') ||
+      pathname.startsWith('/client') ||
+      pathname.startsWith('/abonne');
+    
+    if (isPayDomain) {
+      setIsClientDomain(true);
+      setRouteType('client');
+    } else if (isClientRoute) {
+      setIsClientDomain(false);
+      setRouteType('client');
+    } else {
+      setIsClientDomain(false);
+      setRouteType('admin');
+    }
   }, []);
 
   // Attendre la détection du domaine
-  if (isClientDomain === null) {
+  if (routeType === null) {
     return null;
   }
 
@@ -65,7 +85,7 @@ const DomainRouter = () => {
     );
   }
 
-  // Sinon, afficher l'application de gestion normale
+  // Sinon, afficher l'application de gestion normale avec toutes les routes
   return (
     <Routes>
       {/* Public routes */}
@@ -76,11 +96,13 @@ const DomainRouter = () => {
       <Route path="/account-request" element={<AccountRequest />} />
       <Route path="/create-super-admin" element={<CreateSuperAdmin />} />
       
-      {/* Client Portal routes - accessible via /pay ou /client sur app.agricapital.ci */}
+      {/* Client Portal routes - accessible via /pay, /client, /abonne sur n'importe quel domaine */}
       <Route path="/pay" element={<ClientPortal />} />
       <Route path="/pay/*" element={<ClientPortal />} />
       <Route path="/client" element={<ClientPortal />} />
       <Route path="/client/*" element={<ClientPortal />} />
+      <Route path="/abonne" element={<ClientPortal />} />
+      <Route path="/abonne/*" element={<ClientPortal />} />
       
       {/* Protected routes - Dashboard & Core */}
       <Route path="/dashboard" element={<Dashboard />} />
