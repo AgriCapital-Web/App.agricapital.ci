@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import MainLayout from "@/components/layout/MainLayout";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { supabase } from "@/integrations/supabase/client";
 import { useRealtime } from "@/hooks/useRealtime";
 import { useToast } from "@/hooks/use-toast";
@@ -133,26 +131,24 @@ const Equipes = () => {
   );
 
   return (
-    <ProtectedRoute requiredRole="super_admin">
-      <MainLayout>
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">Gestion des Équipes</h1>
-              <p className="text-muted-foreground mt-1">
-                {equipes.length} équipe(s) enregistrée(s)
-              </p>
-            </div>
-            <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={() => {
-                  setSelectedEquipe(null);
-                  setFormData({ nom: "", chef_equipe_id: "", region_id: "" });
-                }}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nouvelle Équipe
-                </Button>
-              </DialogTrigger>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-bold">Gestion des Équipes</h2>
+          <p className="text-muted-foreground mt-1">
+            {equipes.length} équipe(s) enregistrée(s)
+          </p>
+        </div>
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => {
+              setSelectedEquipe(null);
+              setFormData({ nom: "", chef_equipe_id: "", region_id: "" });
+            }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvelle Équipe
+            </Button>
+          </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
@@ -299,8 +295,6 @@ const Equipes = () => {
             </Table>
           </div>
         </div>
-      </MainLayout>
-    </ProtectedRoute>
   );
 };
 

@@ -1,9 +1,11 @@
 import MainLayout from "@/components/layout/MainLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Gift, Shield, MapPin, Settings2, List, Bell, Globe } from "lucide-react";
+import { Users, Gift, Shield, MapPin, Settings2, List, Bell, Globe, Package, UsersRound } from "lucide-react";
 import Utilisateurs from "@/pages/Utilisateurs";
 import Promotions from "@/pages/Promotions";
+import Offres from "@/pages/Offres";
+import Equipes from "@/pages/Equipes";
 import GestionRoles from "@/pages/parametres/GestionRoles";
 import GestionRegions from "@/pages/parametres/GestionRegions";
 import ChampsPersonnalises from "@/pages/parametres/ChampsPersonnalises";
@@ -24,10 +26,18 @@ const Parametres = () => {
           </div>
 
           <Tabs defaultValue="utilisateurs" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-1">
+            <TabsList className="flex flex-wrap gap-1">
               <TabsTrigger value="utilisateurs">
                 <Users className="h-4 w-4 mr-2" />
                 Utilisateurs
+              </TabsTrigger>
+              <TabsTrigger value="equipes">
+                <UsersRound className="h-4 w-4 mr-2" />
+                Équipes
+              </TabsTrigger>
+              <TabsTrigger value="offres">
+                <Package className="h-4 w-4 mr-2" />
+                Offres
               </TabsTrigger>
               <TabsTrigger value="promotions">
                 <Gift className="h-4 w-4 mr-2" />
@@ -61,6 +71,14 @@ const Parametres = () => {
 
             <TabsContent value="utilisateurs">
               <Utilisateurs />
+            </TabsContent>
+
+            <TabsContent value="equipes">
+              <Equipes />
+            </TabsContent>
+
+            <TabsContent value="offres">
+              <Offres />
             </TabsContent>
 
             <TabsContent value="promotions">
