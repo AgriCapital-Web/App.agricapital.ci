@@ -214,16 +214,16 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Benefits Section */}
+      {/* Benefits Section - Adapté pour l'équipe AgriCapital */}
       <section className="bg-primary/5 py-8 sm:py-12 lg:py-16">
         <div className="container mx-auto px-4 sm:px-6">
-          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center mb-6 sm:mb-8">Pourquoi AgriCapital ?</h3>
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center mb-6 sm:mb-8">Outils pour votre équipe</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-3xl mx-auto">
             {[
-              "Suivi en temps réel de vos plantations",
-              "Paiements sécurisés via Wave",
-              "Équipe technique dédiée",
-              "Rapports détaillés et transparents"
+              "Tableau de bord en temps réel des performances",
+              "Gestion centralisée des souscriptions",
+              "Suivi automatique des commissions",
+              "Rapports détaillés et exports personnalisés"
             ].map((benefit, idx) => (
               <div key={idx} className="flex items-center gap-3 p-3 sm:p-4 bg-background rounded-lg shadow-sm">
                 <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />

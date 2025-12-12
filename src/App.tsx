@@ -22,6 +22,7 @@ import PortefeuilleClients from "./pages/PortefeuilleClients";
 import Portefeuilles from "./pages/Portefeuilles";
 import Equipes from "./pages/Equipes";
 import Promotions from "./pages/Promotions";
+import Offres from "./pages/Offres";
 import NouvelleSouscription from "./pages/NouvelleSouscription";
 import Parametres from "./pages/Parametres";
 import HistoriqueComplet from "./pages/HistoriqueComplet";
@@ -137,6 +138,7 @@ const DomainRouter = () => {
       
       {/* Admin */}
       <Route path="/promotions" element={<Promotions />} />
+      <Route path="/offres" element={<Offres />} />
       <Route path="/parametres" element={<Parametres />} />
       
       {/* Catch-all 404 */}

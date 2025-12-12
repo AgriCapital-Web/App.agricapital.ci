@@ -57,6 +57,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     { icon: BarChart3, label: "Rapports", path: "/rapports-techniques", requireRole: canViewRapports },
     { icon: Wallet, label: "Portefeuilles", path: "/portefeuilles", requireRole: canViewCommissions },
     { icon: Ticket, label: "Tickets", path: "/tickets" },
+    { icon: Sprout, label: "Offres", path: "/offres", adminOnly: true },
     { icon: UserCheck, label: "Demandes", path: "/account-requests", adminOnly: true },
     { icon: Shield, label: "Paramètres", path: "/parametres", adminOnly: true },
   ];
