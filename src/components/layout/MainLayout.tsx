@@ -48,16 +48,14 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Tableau de bord", path: "/dashboard" },
     { icon: Plus, label: "Nouvelle Souscription", path: "/nouvelle-souscription" },
-    { icon: Users, label: "Planteurs", path: "/souscriptions" },
+    { icon: Users, label: "Partenaires Abonnés", path: "/souscriptions" },
     { icon: Sprout, label: "Plantations", path: "/plantations" },
     { icon: CreditCard, label: "Paiements", path: "/paiements", requireRole: canViewPaiements },
     { icon: Smartphone, label: "Paiements Wave", path: "/paiements-wave", requireRole: canViewPaiements },
-    { icon: UsersRound, label: "Équipes", path: "/equipes" },
     { icon: Receipt, label: "Commissions", path: "/commissions", requireRole: canViewCommissions },
     { icon: BarChart3, label: "Rapports", path: "/rapports-techniques", requireRole: canViewRapports },
     { icon: Wallet, label: "Portefeuilles", path: "/portefeuilles", requireRole: canViewCommissions },
     { icon: Ticket, label: "Tickets", path: "/tickets" },
-    { icon: Sprout, label: "Offres", path: "/offres", adminOnly: true },
     { icon: UserCheck, label: "Demandes", path: "/account-requests", adminOnly: true },
     { icon: Shield, label: "Paramètres", path: "/parametres", adminOnly: true },
   ];
@@ -127,8 +125,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <div className="flex h-screen bg-background">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-16 lg:w-20 flex-col flex-shrink-0">
-        <SidebarContent />
+      <aside className="hidden md:flex w-52 lg:w-60 flex-col flex-shrink-0">
+        <SidebarContent expanded />
       </aside>
 
       {/* Mobile Header + Sidebar */}

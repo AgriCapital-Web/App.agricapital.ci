@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Etape0Offre } from "@/components/forms/souscription/Etape0Offre";
 import { Etape1Souscripteur } from "@/components/forms/souscription/Etape1Souscripteur";
 import { Etape2Cotitulaire } from "@/components/forms/souscription/Etape2Cotitulaire";
 import { Etape3Parcelle } from "@/components/forms/souscription/Etape3Parcelle";
@@ -14,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const NouvelleSouscription = () => {
-  const [etapeActuelle, setEtapeActuelle] = useState(1);
+  const [etapeActuelle, setEtapeActuelle] = useState(0);
   const [formData, setFormData] = useState<any>({});
   const [brouillonId, setBrouillonId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -111,7 +112,7 @@ const NouvelleSouscription = () => {
   };
 
   const passerEtapePrecedente = () => {
-    setEtapeActuelle(Math.max(1, etapeActuelle - 1));
+    setEtapeActuelle(Math.max(0, etapeActuelle - 1));
   };
 
   const soumettreFormulaire = async () => {
@@ -120,9 +121,8 @@ const NouvelleSouscription = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      // Validation des champs obligatoires
-      if (!formData.nom_famille || !formData.prenoms || !formData.telephone) {
-        throw new Error("Veuillez remplir tous les champs obligatoires");
+      if (!formData.nom_famille || !formData.prenoms || !formData.telephone || !formData.offre_id) {
+        throw new Error("Veuillez remplir tous les champs obligatoires (identité, coordonnées et offre)");
       }
 
       // Générer l'ID unique
@@ -134,6 +134,7 @@ const NouvelleSouscription = () => {
         .from("souscripteurs")
         .insert({
           id_unique: genId,
+          offre_id: formData.offre_id,
           civilite: formData.civilite?.toLowerCase() || 'm',
           nom_complet: formData.nom_famille || "",
           prenoms: formData.prenoms || "",
@@ -195,6 +196,7 @@ const NouvelleSouscription = () => {
   };
 
   const etapes = [
+    { num: 0, titre: "Offre", component: Etape0Offre },
     { num: 1, titre: "Souscripteur", component: Etape1Souscripteur },
     { num: 2, titre: "Co-titulaire", component: Etape2Cotitulaire },
     { num: 3, titre: "Parcelle", component: Etape3Parcelle },
@@ -203,7 +205,7 @@ const NouvelleSouscription = () => {
     { num: 6, titre: "Confirmation", component: Etape6Confirmation },
   ];
 
-  const EtapeComponent = etapes[etapeActuelle - 1].component;
+  const EtapeComponent = etapes[etapeActuelle].component;
 
   return (
     <MainLayout>
@@ -211,7 +213,7 @@ const NouvelleSouscription = () => {
         <div>
           <h1 className="text-3xl font-bold">Nouvelle Souscription</h1>
           <p className="text-muted-foreground">
-            Formulaire d'enregistrement complet en 6 étapes - Sauvegarde automatique
+            Formulaire d'enregistrement complet en 7 étapes - Sauvegarde automatique
           </p>
         </div>
 
@@ -237,7 +239,7 @@ const NouvelleSouscription = () => {
           <Button
             variant="outline"
             onClick={passerEtapePrecedente}
-            disabled={etapeActuelle === 1 || saving}
+            disabled={etapeActuelle === 0 || saving}
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
             Précédent
