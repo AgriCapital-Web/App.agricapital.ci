@@ -51,42 +51,42 @@ const AccountRequest = () => {
     fetchRegions();
   }, []);
 
-  // Fetch departements when region changes
-  useEffect(() => {
-    const fetchDepartements = async () => {
-      if (formData.region) {
-        const { data } = await supabase
-          .from('departements')
-          .select('*')
-          .eq('region_id', formData.region)
-          .order('nom');
-        setDepartements(data || []);
-        setFormData(prev => ({ ...prev, departement: "", district: "" }));
-        setDistricts([]);
-      } else {
-        setDepartements([]);
-      }
-    };
-    fetchDepartements();
-  }, [formData.region]);
-
-  // Fetch districts when departement changes
+  // Fetch districts when region changes
   useEffect(() => {
     const fetchDistricts = async () => {
-      if (formData.departement) {
+      if (formData.region) {
         const { data } = await supabase
           .from('districts')
           .select('*')
-          .eq('departement_id', formData.departement)
+          .eq('region_id', formData.region)
           .order('nom');
         setDistricts(data || []);
-        setFormData(prev => ({ ...prev, district: "" }));
+        setFormData(prev => ({ ...prev, district: "", departement: "" }));
+        setDepartements([]);
       } else {
         setDistricts([]);
       }
     };
     fetchDistricts();
-  }, [formData.departement]);
+  }, [formData.region]);
+
+  // Fetch departements when district changes
+  useEffect(() => {
+    const fetchDepartements = async () => {
+      if (formData.district) {
+        const { data } = await supabase
+          .from('departements')
+          .select('*')
+          .eq('district_id', formData.district)
+          .order('nom');
+        setDepartements(data || []);
+        setFormData(prev => ({ ...prev, departement: "" }));
+      } else {
+        setDepartements([]);
+      }
+    };
+    fetchDepartements();
+  }, [formData.district]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
