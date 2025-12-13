@@ -102,7 +102,7 @@ const ClientPayment = ({ souscripteur, plantations, paiements, onBack }: ClientP
   // Montant total
   const montantTotal = typePaiement === 'da' ? calculerMontantDA() : calculerMontantContribution();
 
-  // Soumettre le paiement
+  // Soumettre le paiement via FedaPay
   const handleSubmit = async () => {
     if (!plantation || montantTotal <= 0) {
       toast({
@@ -115,8 +115,11 @@ const ClientPayment = ({ souscripteur, plantations, paiements, onBack }: ClientP
 
     setLoading(true);
     try {
+      // Générer une référence unique
+      const reference = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+      
       // Créer le paiement en attente
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('paiements')
         .insert({
           souscripteur_id: souscripteur.id,
@@ -125,6 +128,7 @@ const ClientPayment = ({ souscripteur, plantations, paiements, onBack }: ClientP
           montant: montantTotal,
           statut: 'en_attente',
           mode_paiement: 'Mobile Money',
+          reference,
           metadata: {
             nombre_mois: periodType === 'mois' ? periodCount : (periodType === 'trimestre' ? periodCount * 3 : periodType === 'annee' ? periodCount * 12 : null),
             trimestre: periodType === 'trimestre' ? periodCount : null,
@@ -132,26 +136,49 @@ const ClientPayment = ({ souscripteur, plantations, paiements, onBack }: ClientP
           }
         });
 
-      if (error) throw error;
+      if (insertError) throw insertError;
 
-      toast({
-        title: "Paiement initié",
-        description: "Vous allez être redirigé vers la page de paiement..."
+      // Appeler l'edge function FedaPay
+      const { data: fedapayData, error: fedapayError } = await supabase.functions.invoke('fedapay-create-transaction', {
+        body: {
+          amount: montantTotal,
+          description: typePaiement === 'da' 
+            ? `Droit d'accès - ${plantation.nom || 'Plantation'}` 
+            : `Contribution - ${plantation.nom || 'Plantation'}`,
+          reference,
+          customer: {
+            firstname: souscripteur.prenoms || souscripteur.nom,
+            lastname: souscripteur.nom,
+            email: souscripteur.email || 'client@agricapital.ci',
+            phone: souscripteur.telephone
+          },
+          callback_url: `${window.location.origin}/pay?status=success`
+        }
       });
 
-      // TODO: Rediriger vers FadaPay ou Wave
-      setTimeout(() => {
+      if (fedapayError) throw fedapayError;
+
+      if (fedapayData?.payment_url) {
         toast({
-          title: "En développement",
-          description: "L'intégration de paiement sera disponible prochainement. Votre demande a été enregistrée."
+          title: "Redirection vers FedaPay",
+          description: "Vous allez être redirigé vers la page de paiement sécurisée..."
+        });
+        
+        // Rediriger vers la page de paiement FedaPay
+        window.location.href = fedapayData.payment_url;
+      } else {
+        toast({
+          title: "Paiement initié",
+          description: "Votre demande de paiement a été enregistrée. Un agent vous contactera."
         });
         onBack();
-      }, 2000);
+      }
     } catch (error: any) {
+      console.error('Payment error:', error);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: error.message
+        title: "Erreur de paiement",
+        description: error.message || "Une erreur s'est produite. Veuillez réessayer."
       });
     } finally {
       setLoading(false);

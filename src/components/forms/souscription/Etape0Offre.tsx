@@ -1,33 +1,85 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Crown, TrendingUp, Leaf, Check, Sparkles } from "lucide-react";
-import { offresData } from "@/pages/Offres";
-import { usePromotionActive, calculerMontantDA } from "@/hooks/usePromotionActive";
+import { Crown, TrendingUp, Leaf, Check, Sparkles, Loader2 } from "lucide-react";
+import { usePromotionActive } from "@/hooks/usePromotionActive";
+import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
+
+type Offre = Tables<'offres'>;
 
 interface Etape0Props {
   formData: any;
   updateFormData: (data: any) => void;
 }
 
+const getIcone = (code: string) => {
+  switch (code) {
+    case 'palm-elite': return Crown;
+    case 'palm-invest': return TrendingUp;
+    case 'terra-palm': return Leaf;
+    default: return Crown;
+  }
+};
+
+const getCouleur = (code: string) => {
+  switch (code) {
+    case 'palm-elite':
+      return { text: 'text-amber-600', bg: 'bg-amber-500/10', border: 'border-amber-500/30' };
+    case 'palm-invest':
+      return { text: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/30' };
+    case 'terra-palm':
+      return { text: 'text-emerald-700', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' };
+    default:
+      return { text: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/30' };
+  }
+};
+
 export const Etape0Offre = ({ formData, updateFormData }: Etape0Props) => {
   const { data: promotionActive } = usePromotionActive();
   
+  const { data: offres, isLoading } = useQuery({
+    queryKey: ['offres-souscription'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('offres')
+        .select('*')
+        .eq('actif', true)
+        .order('ordre', { ascending: true });
+      
+      if (error) throw error;
+      return data as Offre[];
+    }
+  });
+
   const formatMontant = (montant: number) => {
     return new Intl.NumberFormat('fr-FR').format(montant);
   };
 
+  const parseAvantages = (avantages: any): string[] => {
+    if (Array.isArray(avantages)) return avantages;
+    if (typeof avantages === 'string') {
+      try {
+        return JSON.parse(avantages);
+      } catch {
+        return [avantages];
+      }
+    }
+    return [];
+  };
+
   // Calculer le montant total du DA basé sur l'offre et la superficie
   const montantDA = useMemo(() => {
-    if (!formData.offre_id || !formData.superficie_prevue) return null;
+    if (!formData.offre_id || !formData.superficie_prevue || !offres) return null;
     
-    const offre = offresData.find(o => o.id === formData.offre_id);
+    const offre = offres.find(o => o.id === formData.offre_id);
     if (!offre) return null;
     
-    const tarifDA = promotionActive ? promotionActive.montant_reduit_ha : offre.droit_acces_reduit;
+    const tarifDA = promotionActive ? promotionActive.montant_reduit_ha : offre.montant_da_par_ha;
     const total = tarifDA * Number(formData.superficie_prevue);
     
     return {
@@ -36,16 +88,15 @@ export const Etape0Offre = ({ formData, updateFormData }: Etape0Props) => {
       superficie: Number(formData.superficie_prevue),
       promotionAppliquee: !!promotionActive
     };
-  }, [formData.offre_id, formData.superficie_prevue, promotionActive]);
+  }, [formData.offre_id, formData.superficie_prevue, promotionActive, offres]);
 
-  const getIcone = (id: string) => {
-    switch (id) {
-      case 'palmelite': return Crown;
-      case 'palminvest': return TrendingUp;
-      case 'terrapalm': return Leaf;
-      default: return Crown;
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -75,9 +126,11 @@ export const Etape0Offre = ({ formData, updateFormData }: Etape0Props) => {
             onValueChange={(value) => updateFormData({ offre_id: value })}
             className="grid grid-cols-1 md:grid-cols-3 gap-4"
           >
-            {offresData.map((offre) => {
-              const IconComponent = getIcone(offre.id);
+            {offres?.map((offre) => {
+              const IconComponent = getIcone(offre.code);
+              const couleurs = getCouleur(offre.code);
               const isSelected = formData.offre_id === offre.id;
+              const avantagesList = parseAvantages(offre.avantages);
               
               return (
                 <div key={offre.id}>
@@ -90,41 +143,29 @@ export const Etape0Offre = ({ formData, updateFormData }: Etape0Props) => {
                     htmlFor={offre.id}
                     className={`flex flex-col h-full p-4 rounded-lg border-2 cursor-pointer transition-all ${
                       isSelected 
-                        ? `${offre.border} ${offre.bg} ring-2 ring-offset-2 ring-primary` 
+                        ? `${couleurs.border} ${couleurs.bg} ring-2 ring-offset-2 ring-primary` 
                         : 'border-border hover:border-primary/50'
                     }`}
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      <div className={`p-2 rounded-full ${offre.bg}`}>
-                        <IconComponent className={`h-6 w-6 ${offre.couleur}`} />
+                      <div className={`p-2 rounded-full ${couleurs.bg}`}>
+                        <IconComponent className={`h-6 w-6 ${couleurs.text}`} />
                       </div>
                       <div>
-                        <h3 className={`font-bold ${offre.couleur}`}>{offre.nom_offre}</h3>
-                        <p className="text-xs text-muted-foreground">{offre.sous_titre}</p>
+                        <h3 className={`font-bold ${couleurs.text}`}>{offre.nom}</h3>
+                        <p className="text-xs text-muted-foreground">{offre.description}</p>
                       </div>
-                    </div>
-                    
-                    <div className="text-sm text-muted-foreground mb-3">
-                      {offre.cible}
                     </div>
                     
                     <div className="mt-auto space-y-2">
                       <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-bold">{formatMontant(offre.droit_acces_reduit)}F</span>
+                        <span className="text-lg font-bold">{formatMontant(offre.montant_da_par_ha)}F</span>
                         <span className="text-xs text-muted-foreground">/ha</span>
                       </div>
                       
-                      {!offre.paiement_unique && (
-                        <div className="text-xs text-muted-foreground">
-                          + {offre.abonnement_jour}F/jour/ha
-                        </div>
-                      )}
-                      
-                      {offre.paiement_unique && (
-                        <Badge variant="secondary" className="text-amber-700 bg-amber-100 text-xs">
-                          Paiement unique
-                        </Badge>
-                      )}
+                      <div className="text-xs text-muted-foreground">
+                        + {formatMontant(offre.contribution_mensuelle_par_ha)}F/mois/ha
+                      </div>
                     </div>
                     
                     {isSelected && (
@@ -189,40 +230,43 @@ export const Etape0Offre = ({ formData, updateFormData }: Etape0Props) => {
       </Card>
 
       {/* Résumé de l'offre sélectionnée */}
-      {formData.offre_id && (
+      {formData.offre_id && offres && (
         <Card>
           <CardHeader>
             <CardTitle>Récapitulatif de l'Offre</CardTitle>
           </CardHeader>
           <CardContent>
             {(() => {
-              const offre = offresData.find(o => o.id === formData.offre_id);
+              const offre = offres.find(o => o.id === formData.offre_id);
               if (!offre) return null;
+              const avantagesList = parseAvantages(offre.avantages);
               
               return (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Offre:</span>
-                      <p className="font-medium">{offre.nom_offre}</p>
+                      <p className="font-medium">{offre.nom}</p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Type:</span>
-                      <p className="font-medium">{offre.sous_titre}</p>
+                      <p className="font-medium">{offre.description}</p>
                     </div>
                   </div>
                   
-                  <div className="border-t pt-4">
-                    <h4 className="font-medium mb-2">Avantages inclus:</h4>
-                    <ul className="space-y-1">
-                      {offre.avantages.map((avantage, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm">
-                          <Check className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-                          <span>{avantage}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {avantagesList.length > 0 && (
+                    <div className="border-t pt-4">
+                      <h4 className="font-medium mb-2">Avantages inclus:</h4>
+                      <ul className="space-y-1">
+                        {avantagesList.map((avantage: string, idx: number) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm">
+                            <Check className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                            <span>{avantage}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               );
             })()}

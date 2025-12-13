@@ -75,6 +75,42 @@ export type Database = {
           },
         ]
       }
+      configurations_systeme: {
+        Row: {
+          categorie: string
+          cle: string
+          created_at: string
+          description: string | null
+          id: string
+          modifiable: boolean | null
+          type_valeur: string
+          updated_at: string
+          valeur: string
+        }
+        Insert: {
+          categorie?: string
+          cle: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          modifiable?: boolean | null
+          type_valeur?: string
+          updated_at?: string
+          valeur: string
+        }
+        Update: {
+          categorie?: string
+          cle?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          modifiable?: boolean | null
+          type_valeur?: string
+          updated_at?: string
+          valeur?: string
+        }
+        Relationships: []
+      }
       departements: {
         Row: {
           created_at: string
