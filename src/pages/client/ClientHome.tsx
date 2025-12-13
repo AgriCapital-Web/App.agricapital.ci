@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import logoGreen from "@/assets/logo-green.png";
+import logoWhite from "@/assets/logo-white.png";
 import { Phone, Loader2, ArrowRight, MessageCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
@@ -141,13 +141,11 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
         {/* Header avec Logo centré */}
         <header className="py-8 px-4">
           <div className="container mx-auto flex flex-col items-center justify-center">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
-              <img 
-                src={logoGreen} 
-                alt="AgriCapital - Portail Abonné" 
-                className="h-20 sm:h-28 object-contain"
-              />
-            </div>
+            <img 
+              src={logoWhite} 
+              alt="AgriCapital - Portail Abonné" 
+              className="h-24 sm:h-32 object-contain drop-shadow-lg"
+            />
             <h1 className="text-white text-xl sm:text-2xl font-bold mt-4 tracking-wide">
               Portail Abonné
             </h1>

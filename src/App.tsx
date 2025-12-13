@@ -55,10 +55,13 @@ const DomainRouter = () => {
       hostname.startsWith('abonne.');
     
     // Vérifier si c'est une route portail abonné sur le domaine principal
+    // Support pour les accents et sans accents
     const isClientRoute = 
       pathname.startsWith('/pay') ||
       pathname.startsWith('/client') ||
-      pathname.startsWith('/abonne');
+      pathname.startsWith('/abonne') ||
+      pathname.startsWith('/abonn%C3%A9') ||
+      decodeURIComponent(pathname).startsWith('/abonné');
     
     if (isPayDomain) {
       setIsClientDomain(true);
@@ -104,6 +107,8 @@ const DomainRouter = () => {
       <Route path="/client/*" element={<ClientPortal />} />
       <Route path="/abonne" element={<ClientPortal />} />
       <Route path="/abonne/*" element={<ClientPortal />} />
+      <Route path="/abonné" element={<ClientPortal />} />
+      <Route path="/abonné/*" element={<ClientPortal />} />
       
       {/* Protected routes - Dashboard & Core */}
       <Route path="/dashboard" element={<Dashboard />} />
