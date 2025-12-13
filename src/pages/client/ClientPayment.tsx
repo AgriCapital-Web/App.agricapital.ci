@@ -121,14 +121,15 @@ const ClientPayment = ({ souscripteur, plantations, paiements, onBack }: ClientP
         .insert({
           souscripteur_id: souscripteur.id,
           plantation_id: plantation.id,
-          type_paiement: typePaiement === 'da' ? 'droit_acces' : 'contribution',
-          montant_theorique: montantTotal,
-          montant_paye: 0,
+          type_paiement: typePaiement === 'da' ? 'DA' : 'contribution',
+          montant: montantTotal,
           statut: 'en_attente',
-          mode_paiement: 'mobile_money',
-          nombre_mois: periodType === 'mois' ? periodCount : (periodType === 'trimestre' ? periodCount * 3 : periodType === 'annee' ? periodCount * 12 : null),
-          trimestre: periodType === 'trimestre' ? periodCount : null,
-          annee: new Date().getFullYear()
+          mode_paiement: 'Mobile Money',
+          metadata: {
+            nombre_mois: periodType === 'mois' ? periodCount : (periodType === 'trimestre' ? periodCount * 3 : periodType === 'annee' ? periodCount * 12 : null),
+            trimestre: periodType === 'trimestre' ? periodCount : null,
+            annee: new Date().getFullYear()
+          }
         });
 
       if (error) throw error;
