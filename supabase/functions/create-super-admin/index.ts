@@ -18,7 +18,7 @@ serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    const { username, email, password, nom_complet, telephone } = await req.json();
+    const { username, email, password, nom_complet, telephone, photo_url } = await req.json();
     console.log('Creating/updating super admin:', { username, email, nom_complet });
 
     let userId: string | undefined;
@@ -65,11 +65,13 @@ serve(async (req) => {
     // Upsert profile
     await supabaseAdmin.from('profiles').upsert({
       id: userId,
-      username,
+      user_id: userId,
       nom_complet,
       email,
       telephone: telephone || null,
-      est_actif: true,
+      photo_url: photo_url || null,
+      actif: true,
+      role: 'super_admin',
     }, { onConflict: 'id' });
 
     // Upsert role
