@@ -186,7 +186,7 @@ const Paiements = () => {
                       </TableCell>
                       <TableCell>{paiement.type_paiement}</TableCell>
                       <TableCell className="font-bold">
-                        {formatMontant(paiement.montant_paye || paiement.montant_theorique)}
+                        {formatMontant(paiement.montant)}
                       </TableCell>
                       <TableCell>
                         {paiement.date_paiement
