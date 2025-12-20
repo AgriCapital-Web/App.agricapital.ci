@@ -87,14 +87,14 @@ const Dashboard = () => {
 
       const { data: paiements } = await (supabase as any)
         .from("paiements")
-        .select("montant_paye, montant_theorique, statut, created_at, plantation_id, plantations(souscripteurs(nom_complet))");
+        .select("montant, statut, created_at, plantation_id, plantations(souscripteurs(nom_complet))");
       
       const totalPaiements = paiements?.filter((p) => p.statut === "valide")
-        .reduce((sum, p) => sum + (p.montant_paye || 0), 0) || 0;
+        .reduce((sum, p) => sum + (p.montant || 0), 0) || 0;
       
       const paiementsEnAttenteCount = paiements?.filter((p) => p.statut === "en_attente").length || 0;
       const montantEnAttente = paiements?.filter((p) => p.statut === "en_attente")
-        .reduce((sum, p) => sum + (p.montant_theorique || 0), 0) || 0;
+        .reduce((sum, p) => sum + (p.montant || 0), 0) || 0;
 
       // Planteurs récents
       const { data: planteurs } = await (supabase as any)
@@ -151,7 +151,7 @@ const Dashboard = () => {
         const paiementsMois = paiements?.filter((p: any) => {
           const d = new Date(p.created_at);
           return d >= debutMois && d <= finMois && p.statut === "valide";
-        }).reduce((sum, p) => sum + (p.montant_paye || 0), 0) || 0;
+        }).reduce((sum, p) => sum + (p.montant || 0), 0) || 0;
 
         mois.push({
           mois: moisNom,
