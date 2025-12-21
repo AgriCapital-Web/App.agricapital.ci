@@ -618,6 +618,7 @@ export type Database = {
           coordonnees_gps: string | null
           created_at: string
           created_by: string | null
+          date_activation: string | null
           date_plantation: string | null
           date_signature_contrat: string | null
           densite_plants: number | null
@@ -643,6 +644,7 @@ export type Database = {
           souscripteur_id: string
           statut: string | null
           statut_global: string | null
+          superficie_activee: number | null
           superficie_ha: number
           type_culture: string | null
           updated_at: string
@@ -662,6 +664,7 @@ export type Database = {
           coordonnees_gps?: string | null
           created_at?: string
           created_by?: string | null
+          date_activation?: string | null
           date_plantation?: string | null
           date_signature_contrat?: string | null
           densite_plants?: number | null
@@ -687,6 +690,7 @@ export type Database = {
           souscripteur_id: string
           statut?: string | null
           statut_global?: string | null
+          superficie_activee?: number | null
           superficie_ha?: number
           type_culture?: string | null
           updated_at?: string
@@ -706,6 +710,7 @@ export type Database = {
           coordonnees_gps?: string | null
           created_at?: string
           created_by?: string | null
+          date_activation?: string | null
           date_plantation?: string | null
           date_signature_contrat?: string | null
           densite_plants?: number | null
@@ -731,6 +736,7 @@ export type Database = {
           souscripteur_id?: string
           statut?: string | null
           statut_global?: string | null
+          superficie_activee?: number | null
           superficie_ha?: number
           type_culture?: string | null
           updated_at?: string
