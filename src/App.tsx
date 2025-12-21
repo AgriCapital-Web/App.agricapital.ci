@@ -125,9 +125,11 @@ const DomainRouter = () => {
       <Route path="/paiements" element={<Paiements />} />
       <Route path="/paiements-wave" element={<PaiementsWave />} />
       
-      {/* Équipes & Utilisateurs */}
-      <Route path="/utilisateurs" element={<Utilisateurs />} />
-      <Route path="/equipes" element={<Equipes />} />
+      {/* Équipes & Utilisateurs - redirigés vers Paramètres */}
+      <Route path="/utilisateurs" element={<Navigate to="/parametres?tab=utilisateurs" replace />} />
+      <Route path="/equipes" element={<Navigate to="/parametres?tab=equipes" replace />} />
+      <Route path="/offres" element={<Navigate to="/parametres?tab=offres" replace />} />
+      <Route path="/promotions" element={<Navigate to="/parametres?tab=promotions" replace />} />
       
       {/* Rapports */}
       <Route path="/rapports-financiers" element={<RapportsFinanciers />} />
@@ -141,9 +143,7 @@ const DomainRouter = () => {
       {/* Support */}
       <Route path="/tickets" element={<Tickets />} />
       
-      {/* Admin */}
-      <Route path="/promotions" element={<Promotions />} />
-      <Route path="/offres" element={<Offres />} />
+      {/* Admin - Paramètres contient tout */}
       <Route path="/parametres" element={<Parametres />} />
       
       {/* Catch-all 404 */}

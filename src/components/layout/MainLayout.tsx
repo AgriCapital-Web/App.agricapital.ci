@@ -59,9 +59,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     { icon: FileText, label: "Rapports Financiers", path: "/rapports-financiers", show: canViewFinances },
     { icon: Ticket, label: "Tickets Support", path: "/tickets" },
     { icon: UserCheck, label: "Demandes Compte", path: "/account-requests", show: isAdmin },
-    { icon: UsersRound, label: "Équipes", path: "/equipes", show: isAdmin },
-    { icon: Shield, label: "Utilisateurs", path: "/utilisateurs", show: canManageUsers },
-    { icon: Tag, label: "Offres", path: "/offres", show: isAdmin },
     { icon: Settings, label: "Paramètres", path: "/parametres", show: isAdmin },
   ];
 

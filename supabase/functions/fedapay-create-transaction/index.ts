@@ -13,19 +13,30 @@ serve(async (req) => {
 
   try {
     const secretKey = Deno.env.get('FEDAPAY_SECRET_KEY');
+    console.log('FedaPay Secret Key exists:', !!secretKey);
+    console.log('FedaPay Secret Key prefix:', secretKey?.substring(0, 15) + '...');
+    
     if (!secretKey) {
-      throw new Error('FEDAPAY_SECRET_KEY not configured');
+      throw new Error('FEDAPAY_SECRET_KEY not configured. Veuillez configurer votre clé API FedaPay dans les secrets.');
+    }
+
+    // Vérifier le format de la clé
+    if (!secretKey.startsWith('sk_sandbox_') && !secretKey.startsWith('sk_live_')) {
+      throw new Error('Format de clé FedaPay invalide. La clé doit commencer par sk_sandbox_ ou sk_live_');
     }
 
     const { amount, description, reference, customer, callback_url } = await req.json();
 
-    console.log('Creating FedaPay transaction:', { amount, description, reference });
+    console.log('Creating FedaPay transaction:', { amount, description, reference, callback_url });
 
     // Determine environment (sandbox or live)
     const isSandbox = secretKey.startsWith('sk_sandbox_');
     const baseUrl = isSandbox 
       ? 'https://sandbox-api.fedapay.com' 
       : 'https://api.fedapay.com';
+
+    console.log('Using FedaPay environment:', isSandbox ? 'SANDBOX' : 'LIVE');
+    console.log('API URL:', baseUrl);
 
     // Create transaction
     const response = await fetch(`${baseUrl}/v1/transactions`, {
@@ -55,9 +66,14 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    console.log('FedaPay response status:', response.status);
     console.log('FedaPay response:', JSON.stringify(data, null, 2));
 
     if (!response.ok) {
+      // Messages d'erreur plus explicites
+      if (data.message === "Erreur d'authentification.") {
+        throw new Error("Clé API FedaPay invalide ou expirée. Veuillez vérifier votre clé secrète dans les paramètres.");
+      }
       throw new Error(data.message || 'Failed to create transaction');
     }
 
