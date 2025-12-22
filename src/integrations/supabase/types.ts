@@ -21,11 +21,18 @@ export type Database = {
           district_id: string | null
           email: string
           id: string
+          justification: string | null
           motif: string | null
+          motif_rejet: string | null
           nom_complet: string
+          photo_url: string | null
+          poste_souhaite: string | null
           region_id: string | null
+          role_souhaite: string | null
           statut: string | null
           telephone: string | null
+          traite_le: string | null
+          traite_par: string | null
         }
         Insert: {
           created_at?: string
@@ -33,11 +40,18 @@ export type Database = {
           district_id?: string | null
           email: string
           id?: string
+          justification?: string | null
           motif?: string | null
+          motif_rejet?: string | null
           nom_complet: string
+          photo_url?: string | null
+          poste_souhaite?: string | null
           region_id?: string | null
+          role_souhaite?: string | null
           statut?: string | null
           telephone?: string | null
+          traite_le?: string | null
+          traite_par?: string | null
         }
         Update: {
           created_at?: string
@@ -45,11 +59,18 @@ export type Database = {
           district_id?: string | null
           email?: string
           id?: string
+          justification?: string | null
           motif?: string | null
+          motif_rejet?: string | null
           nom_complet?: string
+          photo_url?: string | null
+          poste_souhaite?: string | null
           region_id?: string | null
+          role_souhaite?: string | null
           statut?: string | null
           telephone?: string | null
+          traite_le?: string | null
+          traite_par?: string | null
         }
         Relationships: [
           {
@@ -73,7 +94,56 @@ export type Database = {
             referencedRelation: "regions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "account_requests_traite_par_fkey"
+            columns: ["traite_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      champs_personnalises: {
+        Row: {
+          actif: boolean | null
+          created_at: string
+          entite: string
+          id: string
+          libelle: string
+          nom_champ: string
+          obligatoire: boolean | null
+          options: Json | null
+          ordre: number | null
+          type_champ: string | null
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean | null
+          created_at?: string
+          entite: string
+          id?: string
+          libelle: string
+          nom_champ: string
+          obligatoire?: boolean | null
+          options?: Json | null
+          ordre?: number | null
+          type_champ?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean | null
+          created_at?: string
+          entite?: string
+          id?: string
+          libelle?: string
+          nom_champ?: string
+          obligatoire?: boolean | null
+          options?: Json | null
+          ordre?: number | null
+          type_champ?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       commissions: {
         Row: {
@@ -606,6 +676,44 @@ export type Database = {
           },
         ]
       }
+      parametres_notifications: {
+        Row: {
+          actif: boolean | null
+          canal: string | null
+          created_at: string
+          id: string
+          type_notification: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          canal?: string | null
+          created_at?: string
+          id?: string
+          type_notification: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          canal?: string | null
+          created_at?: string
+          id?: string
+          type_notification?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parametres_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plantations: {
         Row: {
           age_plantation: number | null
@@ -797,6 +905,50 @@ export type Database = {
           },
         ]
       }
+      portefeuilles: {
+        Row: {
+          created_at: string
+          dernier_versement_date: string | null
+          dernier_versement_montant: number | null
+          id: string
+          solde_commissions: number | null
+          total_gagne: number | null
+          total_retire: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dernier_versement_date?: string | null
+          dernier_versement_montant?: number | null
+          id?: string
+          solde_commissions?: number | null
+          total_gagne?: number | null
+          total_retire?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dernier_versement_date?: string | null
+          dernier_versement_montant?: number | null
+          id?: string
+          solde_commissions?: number | null
+          total_gagne?: number | null
+          total_retire?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portefeuilles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           actif: boolean | null
@@ -945,6 +1097,73 @@ export type Database = {
             columns: ["district_id"]
             isOneToOne: false
             referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retraits_portefeuille: {
+        Row: {
+          created_at: string
+          date_demande: string
+          date_traitement: string | null
+          id: string
+          mode_paiement: string | null
+          montant: number
+          notes: string | null
+          numero_compte: string | null
+          portefeuille_id: string
+          statut: string | null
+          traite_par: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_demande?: string
+          date_traitement?: string | null
+          id?: string
+          mode_paiement?: string | null
+          montant: number
+          notes?: string | null
+          numero_compte?: string | null
+          portefeuille_id: string
+          statut?: string | null
+          traite_par?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date_demande?: string
+          date_traitement?: string | null
+          id?: string
+          mode_paiement?: string | null
+          montant?: number
+          notes?: string | null
+          numero_compte?: string | null
+          portefeuille_id?: string
+          statut?: string | null
+          traite_par?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retraits_portefeuille_portefeuille_id_fkey"
+            columns: ["portefeuille_id"]
+            isOneToOne: false
+            referencedRelation: "portefeuilles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retraits_portefeuille_traite_par_fkey"
+            columns: ["traite_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retraits_portefeuille_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1136,6 +1355,72 @@ export type Database = {
           },
         ]
       }
+      souscriptions_brouillon: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          donnees: Json | null
+          etape_actuelle: number | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          donnees?: Json | null
+          etape_actuelle?: number | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          donnees?: Json | null
+          etape_actuelle?: number | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      statuts_personnalises: {
+        Row: {
+          actif: boolean | null
+          code: string
+          couleur: string | null
+          created_at: string
+          description: string | null
+          entite: string
+          id: string
+          libelle: string
+          ordre: number | null
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean | null
+          code: string
+          couleur?: string | null
+          created_at?: string
+          description?: string | null
+          entite: string
+          id?: string
+          libelle: string
+          ordre?: number | null
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean | null
+          code?: string
+          couleur?: string | null
+          created_at?: string
+          description?: string | null
+          entite?: string
+          id?: string
+          libelle?: string
+          ordre?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tickets_support: {
         Row: {
           assigne_a: string | null
@@ -1270,6 +1555,7 @@ export type Database = {
     }
     Functions: {
       current_profile_id: { Args: never; Returns: string }
+      generate_souscripteur_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _profile_id: string
