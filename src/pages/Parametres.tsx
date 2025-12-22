@@ -1,11 +1,12 @@
 import MainLayout from "@/components/layout/MainLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Gift, Shield, MapPin, Settings2, List, Bell, Globe, Package, UsersRound } from "lucide-react";
+import { Users, Gift, Shield, MapPin, Settings2, List, Bell, Globe, Package, UsersRound, UserPlus } from "lucide-react";
 import Utilisateurs from "@/pages/Utilisateurs";
 import Promotions from "@/pages/Promotions";
 import Offres from "@/pages/Offres";
 import Equipes from "@/pages/Equipes";
+import AccountRequests from "@/pages/AccountRequests";
 import GestionRoles from "@/pages/parametres/GestionRoles";
 import GestionRegions from "@/pages/parametres/GestionRegions";
 import ChampsPersonnalises from "@/pages/parametres/ChampsPersonnalises";
@@ -26,45 +27,54 @@ const Parametres = () => {
           </div>
 
           <Tabs defaultValue="utilisateurs" className="space-y-4">
-            <TabsList className="flex flex-wrap gap-1">
-              <TabsTrigger value="utilisateurs">
-                <Users className="h-4 w-4 mr-2" />
-                Utilisateurs
+            <TabsList className="flex flex-wrap gap-1 h-auto p-1">
+              <TabsTrigger value="utilisateurs" className="text-xs sm:text-sm">
+                <Users className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Utilisateurs</span>
+                <span className="sm:hidden">Users</span>
               </TabsTrigger>
-              <TabsTrigger value="equipes">
-                <UsersRound className="h-4 w-4 mr-2" />
-                Équipes
+              <TabsTrigger value="equipes" className="text-xs sm:text-sm">
+                <UsersRound className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Équipes</span>
+                <span className="sm:hidden">Équipes</span>
               </TabsTrigger>
-              <TabsTrigger value="offres">
-                <Package className="h-4 w-4 mr-2" />
+              <TabsTrigger value="demandes" className="text-xs sm:text-sm">
+                <UserPlus className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Demandes Compte</span>
+                <span className="sm:hidden">Demandes</span>
+              </TabsTrigger>
+              <TabsTrigger value="offres" className="text-xs sm:text-sm">
+                <Package className="h-4 w-4 mr-1 sm:mr-2" />
                 Offres
               </TabsTrigger>
-              <TabsTrigger value="promotions">
-                <Gift className="h-4 w-4 mr-2" />
-                Promotions
+              <TabsTrigger value="promotions" className="text-xs sm:text-sm">
+                <Gift className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Promotions</span>
+                <span className="sm:hidden">Promos</span>
               </TabsTrigger>
-              <TabsTrigger value="roles">
-                <Shield className="h-4 w-4 mr-2" />
+              <TabsTrigger value="roles" className="text-xs sm:text-sm">
+                <Shield className="h-4 w-4 mr-1 sm:mr-2" />
                 Rôles
               </TabsTrigger>
-              <TabsTrigger value="regions">
-                <MapPin className="h-4 w-4 mr-2" />
+              <TabsTrigger value="regions" className="text-xs sm:text-sm">
+                <MapPin className="h-4 w-4 mr-1 sm:mr-2" />
                 Régions
               </TabsTrigger>
-              <TabsTrigger value="statuts">
-                <List className="h-4 w-4 mr-2" />
+              <TabsTrigger value="statuts" className="text-xs sm:text-sm">
+                <List className="h-4 w-4 mr-1 sm:mr-2" />
                 Statuts
               </TabsTrigger>
-              <TabsTrigger value="champs">
-                <Settings2 className="h-4 w-4 mr-2" />
+              <TabsTrigger value="champs" className="text-xs sm:text-sm">
+                <Settings2 className="h-4 w-4 mr-1 sm:mr-2" />
                 Champs
               </TabsTrigger>
-              <TabsTrigger value="notifications">
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
+              <TabsTrigger value="notifications" className="text-xs sm:text-sm">
+                <Bell className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Notifications</span>
+                <span className="sm:hidden">Notifs</span>
               </TabsTrigger>
-              <TabsTrigger value="systeme">
-                <Globe className="h-4 w-4 mr-2" />
+              <TabsTrigger value="systeme" className="text-xs sm:text-sm">
+                <Globe className="h-4 w-4 mr-1 sm:mr-2" />
                 Système
               </TabsTrigger>
             </TabsList>
@@ -75,6 +85,10 @@ const Parametres = () => {
 
             <TabsContent value="equipes">
               <Equipes />
+            </TabsContent>
+
+            <TabsContent value="demandes">
+              <AccountRequests />
             </TabsContent>
 
             <TabsContent value="offres">

@@ -237,7 +237,7 @@ const NouvelleSouscription = () => {
               onClick={soumettreFormulaire}
               disabled={saving || !formData.contrat_lu}
             >
-              {saving ? "Envoi en cours..." : "✓ SOUMETTRE DOSSIER COMPLET"}
+              {saving ? "Envoi en cours..." : "✓ SOUMETTRE LA SOUSCRIPTION"}
             </Button>
           )}
         </div>

@@ -137,42 +137,42 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
         <link rel="canonical" href="https://pay.agricapital.ci" />
       </Helmet>
       
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary/95 to-primary/85 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary/95 to-primary/85 flex flex-col overflow-x-hidden">
         {/* Header avec Logo centré */}
-        <header className="py-8 px-4">
+        <header className="py-4 sm:py-8 px-3 sm:px-4">
           <div className="container mx-auto flex flex-col items-center justify-center">
             <img 
               src={logoWhite} 
               alt="AgriCapital - Portail Abonné" 
-              className="h-24 sm:h-32 object-contain drop-shadow-lg"
+              className="h-16 sm:h-24 md:h-32 object-contain drop-shadow-lg"
             />
-            <h1 className="text-white text-xl sm:text-2xl font-bold mt-4 tracking-wide">
+            <h1 className="text-white text-lg sm:text-xl md:text-2xl font-bold mt-2 sm:mt-4 tracking-wide">
               Portail Abonné
             </h1>
           </div>
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 flex items-center justify-center px-4 py-6">
-          <Card className="w-full max-w-md shadow-2xl border-0 overflow-hidden backdrop-blur-sm bg-white/95">
+        <main className="flex-1 flex items-center justify-center px-3 sm:px-4 py-4 sm:py-6">
+          <Card className="w-full max-w-[95vw] sm:max-w-md shadow-2xl border-0 overflow-hidden backdrop-blur-sm bg-white/95">
             {/* Decorative Header */}
-            <div className="bg-gradient-to-r from-accent via-accent/90 to-accent/80 py-8 px-6 text-center relative overflow-hidden">
+            <div className="bg-gradient-to-r from-accent via-accent/90 to-accent/80 py-4 sm:py-8 px-4 sm:px-6 text-center relative overflow-hidden">
               <div className="absolute inset-0 opacity-20">
-                <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-16 -translate-y-16"></div>
-                <div className="absolute bottom-0 right-0 w-24 h-24 bg-white rounded-full translate-x-12 translate-y-12"></div>
+                <div className="absolute top-0 left-0 w-24 sm:w-32 h-24 sm:h-32 bg-white rounded-full -translate-x-12 sm:-translate-x-16 -translate-y-12 sm:-translate-y-16"></div>
+                <div className="absolute bottom-0 right-0 w-16 sm:w-24 h-16 sm:h-24 bg-white rounded-full translate-x-8 sm:translate-x-12 translate-y-8 sm:translate-y-12"></div>
               </div>
               <div className="relative z-10">
-                <div className="inline-flex items-center justify-center w-18 h-18 bg-white rounded-full mb-4 shadow-xl p-4">
-                  <Phone className="h-10 w-10 text-primary" />
+                <div className="inline-flex items-center justify-center w-14 h-14 sm:w-18 sm:h-18 bg-white rounded-full mb-3 sm:mb-4 shadow-xl p-3 sm:p-4">
+                  <Phone className="h-6 w-6 sm:h-10 sm:w-10 text-primary" />
                 </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-white">Bienvenue</h2>
-                <p className="text-white/90 text-sm mt-2">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Bienvenue</h2>
+                <p className="text-white/90 text-xs sm:text-sm mt-1 sm:mt-2">
                   Accédez à votre espace partenaire abonné
                 </p>
               </div>
             </div>
 
-            <CardContent className="p-6 sm:p-8 space-y-6">
+            <CardContent className="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6">
               <div className="text-center space-y-2">
                 <p className="text-sm text-muted-foreground">
                   Saisissez votre numéro de téléphone pour accéder à votre compte
