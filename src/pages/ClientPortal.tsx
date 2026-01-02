@@ -4,9 +4,10 @@ import ClientHome from "./client/ClientHome";
 import ClientDashboard from "./client/ClientDashboard";
 import ClientPayment from "./client/ClientPayment";
 import ClientPortfolio from "./client/ClientPortfolio";
+import ClientPaymentHistory from "./client/ClientPaymentHistory";
 import PaymentReturn from "./client/PaymentReturn";
 
-type View = 'home' | 'dashboard' | 'payment' | 'portfolio' | 'payment-return';
+type View = 'home' | 'dashboard' | 'payment' | 'portfolio' | 'history' | 'payment-return';
 
 const ClientPortal = () => {
   const [searchParams] = useSearchParams();
@@ -79,6 +80,7 @@ const ClientPortal = () => {
           paiements={paiements}
           onPayment={() => setView('payment')}
           onPortfolio={() => setView('portfolio')}
+          onHistory={() => setView('history')}
           onLogout={handleLogout}
         />
       );
@@ -96,6 +98,16 @@ const ClientPortal = () => {
     case 'portfolio':
       return (
         <ClientPortfolio
+          souscripteur={souscripteur}
+          plantations={plantations}
+          paiements={paiements}
+          onBack={() => setView('dashboard')}
+        />
+      );
+
+    case 'history':
+      return (
+        <ClientPaymentHistory
           souscripteur={souscripteur}
           plantations={plantations}
           paiements={paiements}

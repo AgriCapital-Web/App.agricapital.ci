@@ -15,7 +15,8 @@ import {
   LogOut,
   CheckCircle,
   AlertTriangle,
-  Clock
+  Clock,
+  History
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -26,6 +27,7 @@ interface ClientDashboardProps {
   paiements: any[];
   onPayment: () => void;
   onPortfolio: () => void;
+  onHistory: () => void;
   onLogout: () => void;
 }
 
@@ -34,7 +36,8 @@ const ClientDashboard = ({
   plantations, 
   paiements, 
   onPayment, 
-  onPortfolio, 
+  onPortfolio,
+  onHistory,
   onLogout 
 }: ClientDashboardProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -204,10 +207,20 @@ const ClientDashboard = ({
           <Button 
             onClick={onPortfolio}
             variant="outline"
-            className="w-full h-16 text-lg font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-white gap-3 transition-all"
+            className="w-full h-14 text-base font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-white gap-3 transition-all"
           >
-            <Wallet className="h-6 w-6" />
-            Accéder à mon portefeuille
+            <Wallet className="h-5 w-5" />
+            Mon portefeuille
+            <ArrowRight className="h-5 w-5 ml-auto" />
+          </Button>
+
+          <Button 
+            onClick={onHistory}
+            variant="outline"
+            className="w-full h-14 text-base font-semibold border-2 border-muted-foreground/30 text-muted-foreground hover:bg-muted gap-3 transition-all"
+          >
+            <History className="h-5 w-5" />
+            Historique des paiements
             <ArrowRight className="h-5 w-5 ml-auto" />
           </Button>
         </div>
