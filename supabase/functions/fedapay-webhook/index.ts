@@ -6,6 +6,37 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-fedapay-signature',
 };
 
+// Verify FedaPay webhook signature
+async function verifySignature(payload: string, signature: string, secret: string): Promise<boolean> {
+  try {
+    // FedaPay uses HMAC-SHA256 for signature verification
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    
+    const signatureBuffer = await crypto.subtle.sign("HMAC", key, encoder.encode(payload));
+    const computedSignature = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    
+    // Constant-time comparison to prevent timing attacks
+    if (signature.length !== computedSignature.length) return false;
+    let result = 0;
+    for (let i = 0; i < signature.length; i++) {
+      result |= signature.charCodeAt(i) ^ computedSignature.charCodeAt(i);
+    }
+    return result === 0;
+  } catch (error) {
+    console.error('Signature verification error:', error);
+    return false;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -16,9 +47,35 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const webhookSecret = Deno.env.get('FEDAPAY_WEBHOOK_SECRET');
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const body = await req.json();
+    // Get raw body for signature verification
+    const rawBody = await req.text();
+    const signature = req.headers.get('x-fedapay-signature') || req.headers.get('X-FedaPay-Signature');
+    
+    // SECURITY: Verify webhook signature if secret is configured
+    if (webhookSecret) {
+      if (!signature) {
+        console.error('Missing signature header');
+        return new Response(JSON.stringify({ error: 'Missing signature' }), { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 
+        });
+      }
+      
+      const isValid = await verifySignature(rawBody, signature, webhookSecret);
+      if (!isValid) {
+        console.error('Invalid webhook signature');
+        return new Response(JSON.stringify({ error: 'Invalid signature' }), { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 
+        });
+      }
+      console.log('Webhook signature verified successfully');
+    } else {
+      console.warn('FEDAPAY_WEBHOOK_SECRET not configured - signature verification skipped');
+    }
+
+    const body = JSON.parse(rawBody);
     console.log('Event:', body.event || body.name);
 
     const event = body.event || body.name;
@@ -26,7 +83,7 @@ serve(async (req) => {
     const transactionId = entity?.id?.toString();
     const reference = entity?.reference || entity?.custom_metadata?.reference;
 
-    // Store event
+    // Store event with verification status
     const { data: eventRecord } = await supabase
       .from('fedapay_events')
       .insert({
