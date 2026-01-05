@@ -670,13 +670,13 @@ const ClientPayment = ({ souscripteur, plantations, paiements, onBack }: ClientP
                 ) : (
                   <>
                     <CreditCard className="h-5 w-5 mr-2" />
-                    Payer avec KKiaPay
+                    Poursuivre le paiement
                   </>
                 )}
               </Button>
 
               <p className="text-xs text-center text-muted-foreground">
-                Paiement sécurisé par KKiaPay - Mobile Money, Wave, Carte bancaire
+                Paiement sécurisé - Mobile Money, Wallet, Compte bancaire
               </p>
             </CardContent>
           </Card>
