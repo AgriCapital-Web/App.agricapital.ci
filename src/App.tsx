@@ -13,7 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import Planteurs from "./pages/Souscriptions";
 import PlanteurDetail from "./pages/PlanteurDetail";
 import Plantations from "./pages/Plantations";
-import Paiements from "./pages/Paiements";
+import GestionPaiements from "./pages/GestionPaiements";
 import Utilisateurs from "./pages/Utilisateurs";
 import RapportsFinanciers from "./pages/RapportsFinanciers";
 import RapportsTechniques from "./pages/RapportsTechniques";
@@ -29,7 +29,6 @@ import HistoriqueComplet from "./pages/HistoriqueComplet";
 import AccountRequest from "./pages/AccountRequest";
 import AccountRequests from "./pages/AccountRequests";
 import CreateSuperAdmin from "./pages/CreateSuperAdmin";
-import PaiementsWave from "./pages/PaiementsWave";
 import Tickets from "./pages/Tickets";
 import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
@@ -121,9 +120,9 @@ const DomainRouter = () => {
       <Route path="/plantations" element={<Plantations />} />
       <Route path="/nouvelle-souscription" element={<NouvelleSouscription />} />
       
-      {/* Paiements */}
-      <Route path="/paiements" element={<Paiements />} />
-      <Route path="/paiements-wave" element={<PaiementsWave />} />
+      {/* Paiements - nouvelle page unifiée */}
+      <Route path="/paiements" element={<GestionPaiements />} />
+      <Route path="/gestion-paiements" element={<GestionPaiements />} />
       
       {/* Équipes & Utilisateurs - redirigés vers Paramètres */}
       <Route path="/utilisateurs" element={<Navigate to="/parametres?tab=utilisateurs" replace />} />
