@@ -47,7 +47,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Tableau de bord", path: "/dashboard" },
     { icon: Plus, label: "Nouvelle Souscription", path: "/nouvelle-souscription" },
-    { icon: Users, label: "Partenaires Abonnés", path: "/souscriptions" },
+    { icon: Users, label: "Souscripteurs", path: "/souscriptions" },
     { icon: Sprout, label: "Plantations", path: "/plantations" },
     { icon: CreditCard, label: "Gestion Paiements", path: "/paiements" },
     { icon: Receipt, label: "Commissions", path: "/commissions", show: canViewFinances },
@@ -56,7 +56,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     { icon: BarChart3, label: "Rapports Techniques", path: "/rapports-techniques", show: canViewRapports },
     { icon: FileText, label: "Rapports Financiers", path: "/rapports-financiers", show: canViewFinances },
     { icon: Ticket, label: "Tickets Support", path: "/tickets" },
-    { icon: UserCheck, label: "Demandes Compte", path: "/account-requests", show: isAdmin },
     { icon: Settings, label: "Paramètres", path: "/parametres", show: isAdmin },
   ];
 

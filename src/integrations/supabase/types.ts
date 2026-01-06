@@ -148,36 +148,60 @@ export type Database = {
       commissions: {
         Row: {
           created_at: string
+          date_calcul: string | null
+          date_validation: string | null
           id: string
           montant: number
+          montant_base: number | null
+          montant_commission: number | null
           paiement_id: string | null
           paye_at: string | null
+          periode: string | null
+          plantation_id: string | null
           profile_id: string
           statut: string | null
           taux: number | null
+          taux_commission: number | null
           type_commission: string
+          valide_par: string | null
         }
         Insert: {
           created_at?: string
+          date_calcul?: string | null
+          date_validation?: string | null
           id?: string
           montant: number
+          montant_base?: number | null
+          montant_commission?: number | null
           paiement_id?: string | null
           paye_at?: string | null
+          periode?: string | null
+          plantation_id?: string | null
           profile_id: string
           statut?: string | null
           taux?: number | null
+          taux_commission?: number | null
           type_commission: string
+          valide_par?: string | null
         }
         Update: {
           created_at?: string
+          date_calcul?: string | null
+          date_validation?: string | null
           id?: string
           montant?: number
+          montant_base?: number | null
+          montant_commission?: number | null
           paiement_id?: string | null
           paye_at?: string | null
+          periode?: string | null
+          plantation_id?: string | null
           profile_id?: string
           statut?: string | null
           taux?: number | null
+          taux_commission?: number | null
           type_commission?: string
+          valide_par?: string | null
         }
         Relationships: [
           {
@@ -188,8 +212,22 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "commissions_plantation_id_fkey"
+            columns: ["plantation_id"]
+            isOneToOne: false
+            referencedRelation: "plantations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "commissions_profile_id_fkey"
             columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_valide_par_fkey"
+            columns: ["valide_par"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -534,6 +572,60 @@ export type Database = {
           },
         ]
       }
+      interventions_techniques: {
+        Row: {
+          created_at: string | null
+          date_intervention: string | null
+          id: string
+          observations: string | null
+          photos_urls: Json | null
+          plantation_id: string | null
+          recommandations: string | null
+          technicien_id: string | null
+          type_intervention: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_intervention?: string | null
+          id?: string
+          observations?: string | null
+          photos_urls?: Json | null
+          plantation_id?: string | null
+          recommandations?: string | null
+          technicien_id?: string | null
+          type_intervention?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_intervention?: string | null
+          id?: string
+          observations?: string | null
+          photos_urls?: Json | null
+          plantation_id?: string | null
+          recommandations?: string | null
+          technicien_id?: string | null
+          type_intervention?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interventions_techniques_plantation_id_fkey"
+            columns: ["plantation_id"]
+            isOneToOne: false
+            referencedRelation: "plantations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interventions_techniques_technicien_id_fkey"
+            columns: ["technicien_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           contenu: string
@@ -773,6 +865,57 @@ export type Database = {
           {
             foreignKeyName: "parametres_notifications_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos_plantation: {
+        Row: {
+          created_at: string | null
+          date_prise: string | null
+          description: string | null
+          id: string
+          phase: string | null
+          plantation_id: string | null
+          prise_par: string | null
+          type_photo: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          date_prise?: string | null
+          description?: string | null
+          id?: string
+          phase?: string | null
+          plantation_id?: string | null
+          prise_par?: string | null
+          type_photo?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          date_prise?: string | null
+          description?: string | null
+          id?: string
+          phase?: string | null
+          plantation_id?: string | null
+          prise_par?: string | null
+          type_photo?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_plantation_plantation_id_fkey"
+            columns: ["plantation_id"]
+            isOneToOne: false
+            referencedRelation: "plantations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_plantation_prise_par_fkey"
+            columns: ["prise_par"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1166,6 +1309,70 @@ export type Database = {
           },
         ]
       }
+      remboursements: {
+        Row: {
+          created_at: string | null
+          date_traitement: string | null
+          id: string
+          mode_remboursement: string | null
+          montant: number
+          motif: string | null
+          numero_compte: string | null
+          paiement_id: string | null
+          souscripteur_id: string | null
+          statut: string | null
+          traite_par: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_traitement?: string | null
+          id?: string
+          mode_remboursement?: string | null
+          montant: number
+          motif?: string | null
+          numero_compte?: string | null
+          paiement_id?: string | null
+          souscripteur_id?: string | null
+          statut?: string | null
+          traite_par?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_traitement?: string | null
+          id?: string
+          mode_remboursement?: string | null
+          montant?: number
+          motif?: string | null
+          numero_compte?: string | null
+          paiement_id?: string | null
+          souscripteur_id?: string | null
+          statut?: string | null
+          traite_par?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remboursements_paiement_id_fkey"
+            columns: ["paiement_id"]
+            isOneToOne: false
+            referencedRelation: "paiements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remboursements_souscripteur_id_fkey"
+            columns: ["souscripteur_id"]
+            isOneToOne: false
+            referencedRelation: "souscripteurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remboursements_traite_par_fkey"
+            columns: ["traite_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       retraits_portefeuille: {
         Row: {
           created_at: string
@@ -1544,6 +1751,132 @@ export type Database = {
           {
             foreignKeyName: "tickets_support_souscripteur_id_fkey"
             columns: ["souscripteur_id"]
+            isOneToOne: false
+            referencedRelation: "souscripteurs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tickets_techniques: {
+        Row: {
+          assigne_a: string | null
+          created_at: string | null
+          cree_par: string | null
+          date_resolution: string | null
+          description: string | null
+          id: string
+          plantation_id: string | null
+          priorite: string | null
+          resolution: string | null
+          statut: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigne_a?: string | null
+          created_at?: string | null
+          cree_par?: string | null
+          date_resolution?: string | null
+          description?: string | null
+          id?: string
+          plantation_id?: string | null
+          priorite?: string | null
+          resolution?: string | null
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigne_a?: string | null
+          created_at?: string | null
+          cree_par?: string | null
+          date_resolution?: string | null
+          description?: string | null
+          id?: string
+          plantation_id?: string | null
+          priorite?: string | null
+          resolution?: string | null
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tickets_techniques_assigne_a_fkey"
+            columns: ["assigne_a"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_techniques_cree_par_fkey"
+            columns: ["cree_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_techniques_plantation_id_fkey"
+            columns: ["plantation_id"]
+            isOneToOne: false
+            referencedRelation: "plantations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transferts_paiements: {
+        Row: {
+          created_at: string | null
+          effectue_par: string | null
+          id: string
+          montant: number
+          motif: string | null
+          paiement_source_id: string | null
+          souscripteur_dest_id: string | null
+          souscripteur_source_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          effectue_par?: string | null
+          id?: string
+          montant: number
+          motif?: string | null
+          paiement_source_id?: string | null
+          souscripteur_dest_id?: string | null
+          souscripteur_source_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          effectue_par?: string | null
+          id?: string
+          montant?: number
+          motif?: string | null
+          paiement_source_id?: string | null
+          souscripteur_dest_id?: string | null
+          souscripteur_source_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transferts_paiements_effectue_par_fkey"
+            columns: ["effectue_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferts_paiements_paiement_source_id_fkey"
+            columns: ["paiement_source_id"]
+            isOneToOne: false
+            referencedRelation: "paiements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferts_paiements_souscripteur_dest_id_fkey"
+            columns: ["souscripteur_dest_id"]
+            isOneToOne: false
+            referencedRelation: "souscripteurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferts_paiements_souscripteur_source_id_fkey"
+            columns: ["souscripteur_source_id"]
             isOneToOne: false
             referencedRelation: "souscripteurs"
             referencedColumns: ["id"]
