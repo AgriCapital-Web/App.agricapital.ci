@@ -1,7 +1,7 @@
 {
-  "name": "Portail Abonné AgriCapital",
-  "short_name": "AgriCapital",
-  "description": "Portail de paiement et gestion pour les partenaires abonnés AgriCapital - Consultez vos plantations et effectuez vos paiements en toute sécurité",
+  "name": "Portail Souscripteur AgriCapital",
+  "short_name": "AgriCapital Pay",
+  "description": "Portail de paiement et gestion pour les souscripteurs AgriCapital - Consultez vos plantations et effectuez vos paiements de redevance mensuel en toute sécurité",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

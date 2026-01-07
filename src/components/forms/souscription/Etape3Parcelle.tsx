@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { MapPin, X } from "lucide-react";
+import { MapPin, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
+const InteractiveMap = lazy(() => import("@/components/maps/InteractiveMap"));
 
 interface Etape3Props {
   formData: any;
@@ -270,45 +272,53 @@ export const Etape3Parcelle = ({ formData, updateFormData }: Etape3Props) => {
       <Card>
         <CardHeader>
           <CardTitle>Coordonnées GPS (Recommandé)</CardTitle>
-          <CardDescription>Non obligatoire mais fortement recommandé</CardDescription>
+          <CardDescription>Cliquez sur la carte pour placer la parcelle ou utilisez "Ma position"</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button type="button" onClick={captureGPS} variant="outline" className="w-full">
-            <MapPin className="mr-2 h-4 w-4" />
-            📍 Capturer GPS
-          </Button>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="latitude">Latitude</Label>
-              <Input
-                id="latitude"
-                type="number"
-                step="any"
-                value={formData.latitude}
-                onChange={(e) => updateFormData({ latitude: e.target.value })}
-              />
+          <Suspense fallback={
+            <div className="h-[300px] bg-muted rounded-lg flex items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2">Chargement de la carte...</span>
             </div>
+          }>
+            <InteractiveMap
+              mode="pick"
+              position={formData.latitude && formData.longitude ? [parseFloat(formData.latitude), parseFloat(formData.longitude)] : null}
+              onPositionChange={(lat, lng, alt) => {
+                updateFormData({
+                  latitude: lat.toFixed(6),
+                  longitude: lng.toFixed(6),
+                  altitude: alt?.toFixed(2) || formData.altitude
+                });
+              }}
+              height="300px"
+            />
+          </Suspense>
 
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="longitude">Longitude</Label>
               <Input
                 id="longitude"
                 type="number"
                 step="any"
-                value={formData.longitude}
+                value={formData.longitude || ""}
                 onChange={(e) => updateFormData({ longitude: e.target.value })}
+                placeholder="Ex: -6.4502"
+                readOnly
+                className="bg-muted"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="altitude">Altitude</Label>
+              <Label htmlFor="altitude">Altitude (m)</Label>
               <Input
                 id="altitude"
                 type="number"
                 step="any"
-                value={formData.altitude}
+                value={formData.altitude || ""}
                 onChange={(e) => updateFormData({ altitude: e.target.value })}
+                placeholder="Automatique"
               />
             </div>
           </div>

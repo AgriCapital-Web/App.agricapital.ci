@@ -94,13 +94,13 @@ const ClientDashboard = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
       {/* Header */}
       <header className="bg-primary text-white py-3 px-4 shadow-lg sticky top-0 z-50">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={logoWhite} alt="AgriCapital" className="h-10 object-contain" />
-            <span className="text-sm font-medium hidden sm:block">Portail Abonné</span>
+            <span className="text-sm font-medium hidden sm:block">Portail Souscripteur</span>
           </div>
           <Button 
             variant="ghost" 
@@ -114,26 +114,26 @@ const ClientDashboard = ({
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6 max-w-lg">
+      <main className="flex-1 container mx-auto px-4 py-4 space-y-4 max-w-lg overflow-y-auto">
         {/* Welcome Card with Photo */}
         <Card className="bg-gradient-to-br from-primary to-primary/80 text-white border-0 shadow-xl overflow-hidden">
-          <CardContent className="p-5 sm:p-6">
-            <div className="flex items-center gap-4">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center gap-3 sm:gap-4">
               {/* Photo avec bordure stylisée vert-doré */}
               <div className="relative flex-shrink-0">
                 <div className="relative">
                   {/* Border gradient effect */}
                   <div className="absolute -inset-1 bg-gradient-to-br from-white via-transparent to-accent rounded-full"></div>
-                  <div className="relative h-20 w-20 rounded-full overflow-hidden border-4 border-white/30">
-                    {souscripteur.photo_profil_url ? (
+                  <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden border-4 border-white/30">
+                    {souscripteur.photo_url ? (
                       <img 
-                        src={souscripteur.photo_profil_url} 
+                        src={souscripteur.photo_url} 
                         alt={souscripteur.nom_complet}
                         className="h-full w-full object-cover"
                       />
                     ) : (
                       <div className="h-full w-full bg-white/20 flex items-center justify-center">
-                        <span className="text-2xl font-bold text-white">
+                        <span className="text-xl sm:text-2xl font-bold text-white">
                           {getInitials(souscripteur.nom_complet)}
                         </span>
                       </div>
@@ -141,14 +141,14 @@ const ClientDashboard = ({
                   </div>
                 </div>
                 {/* Decorative corner borders - vert/doré */}
-                <div className="absolute -top-2 -left-2 w-6 h-6 border-t-[3px] border-l-[3px] border-white rounded-tl-xl"></div>
-                <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-[3px] border-r-[3px] border-accent rounded-br-xl"></div>
+                <div className="absolute -top-1 -left-1 w-4 h-4 sm:w-6 sm:h-6 border-t-[3px] border-l-[3px] border-white rounded-tl-xl"></div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-6 sm:h-6 border-b-[3px] border-r-[3px] border-accent rounded-br-xl"></div>
               </div>
               
               <div className="flex-1 min-w-0">
-                <p className="text-sm opacity-90">Bienvenue,</p>
-                <h2 className="text-lg sm:text-xl font-bold truncate">{souscripteur.nom_complet}</h2>
-                <div className="flex items-center gap-2 mt-1 text-sm opacity-90">
+                <p className="text-xs sm:text-sm opacity-90">Bienvenue,</p>
+                <h2 className="text-base sm:text-lg md:text-xl font-bold truncate">{souscripteur.nom_complet}</h2>
+                <div className="flex items-center gap-2 mt-1 text-xs sm:text-sm opacity-90">
                   <Phone className="h-3 w-3" />
                   <span>{souscripteur.telephone}</span>
                 </div>
@@ -160,19 +160,29 @@ const ClientDashboard = ({
           </CardContent>
         </Card>
 
-        {/* Alert if arriérés */}
+        {/* Alert if arriérés avec bouton rattraper */}
         {hasArrieres && (
-          <Card className="bg-red-50 border-red-200 animate-pulse">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
+          <Card className="bg-red-50 border-red-200">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-red-800 text-sm sm:text-base">⚠️ Arriéré de paiement</p>
+                  <p className="text-xs sm:text-sm text-red-600">
+                    {joursRetard} jour(s) de retard • {formatMontant(totalArrieres)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-red-800">⚠️ Arriéré de paiement</p>
-                <p className="text-sm text-red-600">
-                  {joursRetard} jour(s) de retard • {formatMontant(totalArrieres)}
-                </p>
-              </div>
+              <Button 
+                onClick={onPayment}
+                className="w-full mt-3 bg-red-600 hover:bg-red-700 text-white gap-2 h-10"
+                size="sm"
+              >
+                <CreditCard className="h-4 w-4" />
+                Rattraper mes arriérés
+              </Button>
             </CardContent>
           </Card>
         )}

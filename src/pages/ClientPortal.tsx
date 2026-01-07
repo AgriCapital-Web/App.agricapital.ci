@@ -29,9 +29,9 @@ const ClientPortal = () => {
     }
   }, [searchParams]);
 
-  // Mettre le titre et le manifest pour le portail abonné
+  // Mettre le titre et le manifest pour le portail souscripteur
   useEffect(() => {
-    document.title = "Portail Abonné | AgriCapital";
+    document.title = "Portail Souscripteur | AgriCapital";
     
     // Changer le manifest pour le PWA
     const manifestLink = document.querySelector('link[rel="manifest"]');
