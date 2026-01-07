@@ -25,7 +25,7 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
 
   // Mettre à jour le manifest et SEO pour le portail abonné
   useEffect(() => {
-    document.title = "Portail Abonné | AgriCapital - Accédez à votre espace partenaire";
+    document.title = "Portail Souscripteur | AgriCapital - Accédez à votre espace partenaire";
     
     // Changer le manifest
     const manifestLink = document.querySelector('link[rel="manifest"]');
@@ -125,15 +125,15 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
   return (
     <>
       <Helmet>
-        <title>Portail Abonné | AgriCapital - Accédez à votre espace partenaire</title>
-        <meta name="description" content="Portail de paiement et de gestion pour les partenaires abonnés AgriCapital. Consultez vos plantations, effectuez vos paiements et suivez votre portefeuille en temps réel." />
-        <meta name="keywords" content="AgriCapital, portail abonné, partenaire, plantations, paiement, Côte d'Ivoire, palmier à huile, agriculture" />
-        <meta property="og:title" content="Portail Abonné | AgriCapital" />
-        <meta property="og:description" content="Portail de paiement et de gestion pour les partenaires abonnés AgriCapital. Consultez vos plantations et effectuez vos paiements." />
+        <title>Portail Souscripteur | AgriCapital - Accédez à votre espace partenaire</title>
+        <meta name="description" content="Portail de paiement et de gestion pour les souscripteurs AgriCapital. Consultez vos plantations, effectuez vos paiements de redevance mensuel et suivez votre portefeuille en temps réel." />
+        <meta name="keywords" content="AgriCapital, portail souscripteur, partenaire, plantations, paiement, Côte d'Ivoire, palmier à huile, agriculture, redevance mensuel" />
+        <meta property="og:title" content="Portail Souscripteur | AgriCapital" />
+        <meta property="og:description" content="Portail de paiement et de gestion pour les souscripteurs AgriCapital. Consultez vos plantations et effectuez vos paiements." />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Portail Abonné | AgriCapital" />
-        <meta name="twitter:description" content="Portail de paiement pour les partenaires abonnés AgriCapital" />
+        <meta name="twitter:title" content="Portail Souscripteur | AgriCapital" />
+        <meta name="twitter:description" content="Portail de paiement pour les souscripteurs AgriCapital" />
         <link rel="canonical" href="https://pay.agricapital.ci" />
       </Helmet>
       
@@ -147,7 +147,7 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
               className="h-16 sm:h-24 md:h-32 object-contain drop-shadow-lg"
             />
             <h1 className="text-white text-lg sm:text-xl md:text-2xl font-bold mt-2 sm:mt-4 tracking-wide">
-              Portail Abonné
+              Portail Souscripteur
             </h1>
           </div>
         </header>
@@ -167,7 +167,7 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
                 </div>
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Bienvenue</h2>
                 <p className="text-white/90 text-xs sm:text-sm mt-1 sm:mt-2">
-                  Accédez à votre espace partenaire abonné
+                  Accédez à votre espace souscripteur
                 </p>
               </div>
             </div>
@@ -216,12 +216,12 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
               </div>
 
               <div className="pt-4 border-t space-y-4">
-                <div className="text-center space-y-2">
+              <div className="text-center space-y-2">
                   <p className="text-sm font-semibold text-foreground">
                     Nouveau sur AgriCapital ?
                   </p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Contactez l'équipe AgriCapital au <strong className="text-primary">05 64 55 17 17</strong> pour créer votre compte partenaire abonné.
+                    Contactez l'équipe AgriCapital au <strong className="text-primary">05 64 55 17 17</strong> pour créer votre compte souscripteur.
                   </p>
                   <p className="text-xs text-green-600 flex items-center justify-center gap-1">
                     <MessageCircle className="h-3 w-3" />

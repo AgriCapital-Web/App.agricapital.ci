@@ -1,103 +1,106 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin } from "lucide-react";
+import { MapPin, Loader2 } from "lucide-react";
 
-interface PlantationLocation {
-  sous_prefecture: string;
-  count: number;
-  superficie: number;
+const InteractiveMap = lazy(() => import("@/components/maps/InteractiveMap"));
+
+interface PlantationMarker {
+  id: string;
+  lat: number;
+  lng: number;
+  label: string;
+  info: string;
 }
 
 export const PlantationsMap = () => {
-  const [locations, setLocations] = useState<PlantationLocation[]>([]);
+  const [markers, setMarkers] = useState<PlantationMarker[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLocations();
+    fetchPlantations();
   }, []);
 
-  const fetchLocations = async () => {
+  const fetchPlantations = async () => {
     try {
       const { data, error } = await (supabase as any)
         .from("plantations")
         .select(`
-          sous_prefecture_id,
+          id,
+          id_unique,
+          nom_plantation,
+          latitude,
+          longitude,
           superficie_ha,
+          village_nom,
+          souscripteurs (nom_complet),
           sous_prefectures (nom)
-        `);
+        `)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
 
       if (error) throw error;
 
-      // Grouper par sous-préfecture
-      const grouped = data.reduce((acc: any, curr: any) => {
-        const spName = curr.sous_prefectures?.nom || "Non défini";
-        if (!acc[spName]) {
-          acc[spName] = { count: 0, superficie: 0 };
-        }
-        acc[spName].count += 1;
-        acc[spName].superficie += Number(curr.superficie_ha) || 0;
-        return acc;
-      }, {});
+      const plantationMarkers: PlantationMarker[] = (data || [])
+        .filter((p: any) => p.latitude && p.longitude)
+        .map((p: any) => ({
+          id: p.id,
+          lat: parseFloat(p.latitude),
+          lng: parseFloat(p.longitude),
+          label: p.nom_plantation || p.id_unique || 'Plantation',
+          info: `${p.souscripteurs?.nom_complet || 'N/A'} • ${p.superficie_ha || 0} ha • ${p.sous_prefectures?.nom || p.village_nom || 'N/A'}`
+        }));
 
-      const locationsList = Object.entries(grouped).map(([name, data]: [string, any]) => ({
-        sous_prefecture: name,
-        count: data.count,
-        superficie: data.superficie,
-      }));
-
-      setLocations(locationsList.sort((a, b) => b.count - a.count));
+      setMarkers(plantationMarkers);
     } catch (error) {
-      console.error("Erreur lors du chargement des localisations:", error);
+      console.error("Erreur lors du chargement des plantations:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const maxCount = Math.max(...locations.map(l => l.count), 1);
-
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="h-5 w-5" />
-          Carte des Plantations par Sous-Préfecture
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+          <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+          Carte Interactive des Plantations
+          {markers.length > 0 && (
+            <span className="text-xs font-normal text-muted-foreground ml-auto">
+              {markers.length} plantation(s) localisée(s)
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-2 sm:p-4">
         {loading ? (
-          <div className="text-center py-8 text-muted-foreground">Chargement...</div>
-        ) : locations.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Aucune plantation enregistrée
+          <div className="h-[300px] sm:h-[400px] flex items-center justify-center bg-muted/50 rounded-lg">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted-foreground">Chargement de la carte...</span>
+          </div>
+        ) : markers.length === 0 ? (
+          <div className="h-[300px] sm:h-[400px] flex flex-col items-center justify-center bg-muted/30 rounded-lg">
+            <MapPin className="h-12 w-12 text-muted-foreground/50 mb-2" />
+            <p className="text-muted-foreground text-center">
+              Aucune plantation avec coordonnées GPS
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
+              Les plantations apparaîtront ici lorsqu'elles auront des coordonnées GPS enregistrées
+            </p>
           </div>
         ) : (
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {locations.map((loc, idx) => {
-              const percentage = (loc.count / maxCount) * 100;
-              return (
-                <div key={idx} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{loc.sous_prefecture}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">
-                        {loc.count} plantation{loc.count > 1 ? 's' : ''}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        ({loc.superficie.toFixed(1)} ha)
-                      </span>
-                    </div>
-                  </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary transition-all duration-500"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <Suspense fallback={
+            <div className="h-[300px] sm:h-[400px] flex items-center justify-center bg-muted/50 rounded-lg">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          }>
+            <InteractiveMap
+              mode="view"
+              markers={markers}
+              height="400px"
+              className="rounded-lg overflow-hidden"
+            />
+          </Suspense>
         )}
       </CardContent>
     </Card>
