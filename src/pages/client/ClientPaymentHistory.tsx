@@ -66,7 +66,7 @@ const ClientPaymentHistory = ({ souscripteur, plantations, paiements, onBack }: 
     const rows = filteredPaiements.map(p => [
       p.reference || "-",
       p.date_paiement ? format(new Date(p.date_paiement), "dd/MM/yyyy HH:mm") : format(new Date(p.created_at), "dd/MM/yyyy HH:mm"),
-      p.type_paiement === "DA" ? "Droit d'Accès" : "Contribution",
+      p.type_paiement === "DA" ? "Droit d'Accès" : "Redevance mensuel",
       p.plantations?.nom_plantation || p.plantations?.id_unique || "-",
       p.montant_paye || p.montant,
       p.statut === "valide" ? "Validé" : p.statut === "echec" ? "Échoué" : "En attente",
@@ -123,11 +123,11 @@ const ClientPaymentHistory = ({ souscripteur, plantations, paiements, onBack }: 
       .filter(p => p.type_paiement === "DA" && p.statut === "valide")
       .reduce((sum, p) => sum + (p.montant_paye || p.montant || 0), 0);
     
-    const totalContrib = paiements
-      .filter(p => p.type_paiement === "contribution" && p.statut === "valide")
+    const totalRedevances = paiements
+      .filter(p => (p.type_paiement === "contribution" || p.type_paiement === "REDEVANCE") && p.statut === "valide")
       .reduce((sum, p) => sum + (p.montant_paye || p.montant || 0), 0);
     
-    return { totalPaye, totalDA, totalContrib, count: paiements.filter(p => p.statut === "valide").length };
+    return { totalPaye, totalDA, totalRedevances, count: paiements.filter(p => p.statut === "valide").length };
   }, [paiements]);
 
   return (
@@ -162,8 +162,8 @@ const ClientPaymentHistory = ({ souscripteur, plantations, paiements, onBack }: 
             <p className="text-lg font-bold text-green-600">{formatMontant(stats.totalDA)}</p>
           </Card>
           <Card className="p-4">
-            <p className="text-xs text-muted-foreground">Contributions</p>
-            <p className="text-lg font-bold text-blue-600">{formatMontant(stats.totalContrib)}</p>
+            <p className="text-xs text-muted-foreground">Redevances mensuelles</p>
+            <p className="text-lg font-bold text-blue-600">{formatMontant(stats.totalRedevances)}</p>
           </Card>
           <Card className="p-4">
             <p className="text-xs text-muted-foreground">Transactions</p>
@@ -204,7 +204,7 @@ const ClientPaymentHistory = ({ souscripteur, plantations, paiements, onBack }: 
                 <SelectContent>
                   <SelectItem value="all">Tous les types</SelectItem>
                   <SelectItem value="DA">Droit d'Accès</SelectItem>
-                  <SelectItem value="contribution">Contribution</SelectItem>
+                  <SelectItem value="REDEVANCE">Redevance mensuel</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -282,7 +282,7 @@ const ClientPaymentHistory = ({ souscripteur, plantations, paiements, onBack }: 
                           </TableCell>
                           <TableCell>
                             <Badge variant={p.type_paiement === "DA" ? "default" : "secondary"}>
-                              {p.type_paiement === "DA" ? "DA" : "Contrib."}
+                              {p.type_paiement === "DA" ? "DA" : "Redevance"}
                             </Badge>
                           </TableCell>
                           <TableCell className="max-w-[150px] truncate">
