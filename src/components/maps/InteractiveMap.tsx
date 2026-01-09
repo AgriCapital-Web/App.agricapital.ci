@@ -1,17 +1,22 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Button } from '@/components/ui/button';
 import { MapPin, Locate, Navigation } from 'lucide-react';
 
-// Fix for default markers
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
+// Fix Leaflet default marker icons
+const defaultIcon = L.icon({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
+
+L.Marker.prototype.options.icon = defaultIcon;
 
 const redIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -63,7 +68,7 @@ interface InteractiveMapProps {
   className?: string;
 }
 
-export const InteractiveMap = ({
+const InteractiveMapComponent = ({
   mode = 'view',
   position: initialPosition,
   onPositionChange,
@@ -197,4 +202,6 @@ export const InteractiveMap = ({
   );
 };
 
+// Use memo to prevent unnecessary re-renders
+export const InteractiveMap = memo(InteractiveMapComponent);
 export default InteractiveMap;

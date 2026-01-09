@@ -44,10 +44,14 @@ interface UtilisateurFormProps {
 }
 
 const ROLES = [
-  "super_admin", "pdg", "directeur_general", "directeur_commercial",
-  "responsable_zone", "chef_equipe", "commercial", "technicien",
-  "responsable_operations", "responsable_service_client",
-  "agent_service_client", "responsable_financier", "comptable"
+  { value: "super_admin", label: "Super Admin" },
+  { value: "directeur_tc", label: "Directeur TC" },
+  { value: "responsable_zone", label: "Responsable Zone" },
+  { value: "comptable", label: "Comptable" },
+  { value: "commercial", label: "Commercial" },
+  { value: "service_client", label: "Service Client" },
+  { value: "operations", label: "Opérations" },
+  { value: "user", label: "Utilisateur" }
 ];
 
 const UtilisateurFormNew = ({ utilisateur, onSuccess, onCancel }: UtilisateurFormProps) => {
@@ -63,14 +67,12 @@ const UtilisateurFormNew = ({ utilisateur, onSuccess, onCancel }: UtilisateurFor
   const [districts, setDistricts] = useState<any[]>([]);
   const [regions, setRegions] = useState<any[]>([]);
   const [equipes, setEquipes] = useState<any[]>([]);
-  const [departementsEntreprise, setDepartementsEntreprise] = useState<any[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string>(utilisateur?.photo_url || "");
   const relationRH = watch("relation_rh");
 
   useEffect(() => {
     fetchDistricts();
     fetchEquipes();
-    fetchDepartementsEntreprise();
   }, []);
 
   const fetchDistricts = async () => {
@@ -93,10 +95,16 @@ const UtilisateurFormNew = ({ utilisateur, onSuccess, onCancel }: UtilisateurFor
     if (data) setEquipes(data);
   };
 
-  const fetchDepartementsEntreprise = async () => {
-    const { data } = await (supabase as any).from("departements_entreprise").select("*").order("nom");
-    if (data) setDepartementsEntreprise(data);
-  };
+  // Liste des départements de l'entreprise (statique)
+  const departementsEntreprise = [
+    { id: "1", nom: "Direction Générale" },
+    { id: "2", nom: "Commercial" },
+    { id: "3", nom: "Technique" },
+    { id: "4", nom: "Finance & Comptabilité" },
+    { id: "5", nom: "Opérations" },
+    { id: "6", nom: "Service Client" },
+    { id: "7", nom: "Ressources Humaines" }
+  ];
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -401,16 +409,16 @@ const UtilisateurFormNew = ({ utilisateur, onSuccess, onCancel }: UtilisateurFor
           <CardTitle>Rôles et Permissions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-3 p-4 border rounded-lg">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 border rounded-lg">
             {ROLES.map((role) => (
-              <div key={role} className="flex items-center space-x-2">
+              <div key={role.value} className="flex items-center space-x-2">
                 <Checkbox
-                  id={role}
-                  checked={selectedRoles.includes(role)}
-                  onCheckedChange={() => toggleRole(role)}
+                  id={role.value}
+                  checked={selectedRoles.includes(role.value)}
+                  onCheckedChange={() => toggleRole(role.value)}
                 />
-                <label htmlFor={role} className="text-sm cursor-pointer">
-                  {role}
+                <label htmlFor={role.value} className="text-sm cursor-pointer">
+                  {role.label}
                 </label>
               </div>
             ))}
