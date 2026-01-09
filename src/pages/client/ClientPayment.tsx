@@ -322,8 +322,8 @@ const ClientPayment = ({ souscripteur, plantations, paiements, onBack }: ClientP
                 <div className={`flex items-center space-x-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${typePaiement === 'redevance' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
                   <RadioGroupItem value="redevance" id="redevance" />
                   <Label htmlFor="redevance" className="flex-1 cursor-pointer">
-                    <span className="font-semibold block">Redevance modulable</span>
-                    <span className="text-sm text-muted-foreground">Paiement des cotisations</span>
+                    <span className="font-semibold block">Redevance mensuel</span>
+                    <span className="text-sm text-muted-foreground">Paiement des cotisations mensuelles</span>
                   </Label>
                   <Badge variant="secondary">{formatMontant(TARIFS.jour)}/jour</Badge>
                 </div>

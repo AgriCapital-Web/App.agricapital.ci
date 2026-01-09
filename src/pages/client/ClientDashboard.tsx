@@ -57,7 +57,7 @@ const ClientDashboard = ({
   // Calculer les statistiques
   const totalHectares = plantations.reduce((sum, p) => sum + (p.superficie_ha || 0), 0);
   const totalDAVerse = souscripteur.total_da_verse || 0;
-  const totalContributions = souscripteur.total_contributions_versees || 0;
+  const totalRedevances = souscripteur.total_contributions_versees || 0;
   
   // Calculer les arriérés (simplifié - 65F/jour)
   const calculateArrieres = () => {
@@ -71,7 +71,7 @@ const ClientDashboard = ({
           const joursDepuisActivation = Math.floor((new Date().getTime() - dateActivation.getTime()) / (1000 * 60 * 60 * 24));
           const montantAttendu = joursDepuisActivation * 65 * plantation.superficie_activee;
           const montantPaye = paiements
-            .filter(p => p.plantation_id === plantation.id && p.type_paiement === 'contribution' && p.statut === 'valide')
+            .filter(p => p.plantation_id === plantation.id && (p.type_paiement === 'contribution' || p.type_paiement === 'REDEVANCE') && p.statut === 'valide')
             .reduce((sum, p) => sum + (p.montant_paye || 0), 0);
           
           if (montantAttendu > montantPaye) {
@@ -264,9 +264,9 @@ const ClientDashboard = ({
             <CardContent className="p-3">
               <div className="flex items-center gap-2 mb-1">
                 <CreditCard className="h-4 w-4 text-blue-600" />
-                <span className="text-xs text-muted-foreground">Contributions</span>
+                <span className="text-xs text-muted-foreground">Redevances mensuelles</span>
               </div>
-              <p className="text-sm font-bold">{formatMontant(totalContributions)}</p>
+              <p className="text-sm font-bold">{formatMontant(totalRedevances)}</p>
             </CardContent>
           </Card>
           
