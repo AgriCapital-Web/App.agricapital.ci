@@ -83,13 +83,21 @@ const GestionPaiements = () => {
   const [loading, setLoading] = useState(false);
 
   // Transfer state
-  const [targetPhone, setTargetPhone] = useState("");
+  const [sourcePhone, setSourcePhone] = useState("");
+  const [targetAccount, setTargetAccount] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const [transferNotes, setTransferNotes] = useState("");
+  const [sourceSouscripteur, setSourceSouscripteur] = useState<any>(null);
+  const [targetSouscripteur, setTargetSouscripteur] = useState<any>(null);
 
   // Refund state
+  const [refundSourcePhone, setRefundSourcePhone] = useState("");
+  const [refundPaiementId, setRefundPaiementId] = useState("");
   const [refundAmount, setRefundAmount] = useState("");
   const [refundNotes, setRefundNotes] = useState("");
+  const [refundMode, setRefundMode] = useState("Mobile Money");
+  const [refundNumero, setRefundNumero] = useState("");
+  const [sourcePaiements, setSourcePaiements] = useState<Paiement[]>([]);
 
   // Convert state
   const [convertPeriod, setConvertPeriod] = useState<'jour' | 'mois' | 'trimestre' | 'semestre' | 'annee'>('mois');
@@ -220,60 +228,74 @@ const GestionPaiements = () => {
     }
   };
 
+  // Search souscripteur by phone
+  const searchSouscripteur = async (phone: string, target: 'source' | 'target') => {
+    if (phone.length < 8) return;
+    const { data } = await supabase
+      .from('souscripteurs')
+      .select('id, nom_complet, telephone, id_unique')
+      .or(`telephone.ilike.%${phone}%,id_unique.ilike.%${phone}%`)
+      .eq('statut', 'actif')
+      .limit(5);
+    
+    if (data && data.length > 0) {
+      if (target === 'source') {
+        setSourceSouscripteur(data[0]);
+        // Fetch paiements for this souscripteur
+        const { data: paiements } = await supabase
+          .from('paiements')
+          .select('*')
+          .eq('souscripteur_id', data[0].id)
+          .eq('statut', 'valide')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        setSourcePaiements(paiements || []);
+      } else {
+        setTargetSouscripteur(data[0]);
+      }
+    }
+  };
+
   // Handle transfer between accounts
   const handleTransfer = async () => {
-    if (!selectedPaiement || !targetPhone || !transferAmount) return;
+    if (!sourceSouscripteur || !targetSouscripteur || !transferAmount) {
+      toast({ variant: "destructive", title: "Erreur", description: "Veuillez remplir tous les champs" });
+      return;
+    }
     setLoading(true);
     
     try {
-      // Find target souscripteur
-      const { data: targetSous, error: targetError } = await supabase
-        .from('souscripteurs')
-        .select('id, nom_complet')
-        .eq('telephone', targetPhone.replace(/\D/g, ''))
-        .single();
-
-      if (targetError || !targetSous) {
-        throw new Error('Souscripteur cible non trouvé avec ce numéro');
-      }
-
-      // Create transfer record (adjusting payment)
       const amount = parseFloat(transferAmount);
       
-      // Update original payment
-      await supabase
-        .from('paiements')
-        .update({
-          montant_paye: (selectedPaiement.montant_paye || selectedPaiement.montant) - amount,
-          metadata: {
-            ...selectedPaiement.metadata,
-            transfert_sortant: {
-              montant: amount,
-              vers: targetSous.id,
-              date: new Date().toISOString(),
-              notes: transferNotes
-            }
-          }
-        })
-        .eq('id', selectedPaiement.id);
+      // Create transfer record
+      const { error: transferError } = await supabase
+        .from('transferts_paiements')
+        .insert({
+          souscripteur_source_id: sourceSouscripteur.id,
+          souscripteur_dest_id: targetSouscripteur.id,
+          montant: amount,
+          motif: transferNotes
+        });
+
+      if (transferError) throw transferError;
 
       // Create new payment for target
       const { error: insertError } = await supabase
         .from('paiements')
         .insert({
-          souscripteur_id: targetSous.id,
+          souscripteur_id: targetSouscripteur.id,
           montant: amount,
           montant_paye: amount,
-          type_paiement: selectedPaiement.type_paiement,
+          type_paiement: 'REDEVANCE',
           statut: 'valide',
           mode_paiement: 'Transfert interne',
-          reference: `TRANSFER-${Date.now()}`,
+          reference: `TRF-${Date.now()}`,
           date_paiement: new Date().toISOString(),
           metadata: {
             transfert_entrant: {
+              depuis: sourceSouscripteur.id,
+              depuis_nom: sourceSouscripteur.nom_complet,
               montant: amount,
-              depuis: selectedPaiement.souscripteur_id,
-              paiement_origine: selectedPaiement.id,
               date: new Date().toISOString(),
               notes: transferNotes
             }
@@ -284,7 +306,7 @@ const GestionPaiements = () => {
 
       toast({
         title: "Transfert effectué",
-        description: `${formatMontant(amount)} transféré vers ${targetSous.nom_complet}`
+        description: `${formatMontant(amount)} transféré de ${sourceSouscripteur.nom_complet} vers ${targetSouscripteur.nom_complet}`
       });
 
       setIsTransferDialogOpen(false);
@@ -303,31 +325,53 @@ const GestionPaiements = () => {
 
   // Handle refund
   const handleRefund = async () => {
-    if (!selectedPaiement || !refundAmount) return;
+    if (!sourceSouscripteur || !refundPaiementId || !refundAmount) {
+      toast({ variant: "destructive", title: "Erreur", description: "Veuillez remplir tous les champs" });
+      return;
+    }
     setLoading(true);
 
     try {
       const amount = parseFloat(refundAmount);
+      const sourcePaiement = sourcePaiements.find(p => p.id === refundPaiementId);
       
+      if (!sourcePaiement) throw new Error("Paiement source non trouvé");
+      
+      // Create refund record
+      const { error: refundError } = await supabase
+        .from('remboursements')
+        .insert({
+          paiement_id: refundPaiementId,
+          souscripteur_id: sourceSouscripteur.id,
+          montant: amount,
+          motif: refundNotes,
+          mode_remboursement: refundMode,
+          numero_compte: refundNumero,
+          statut: 'en_attente'
+        });
+
+      if (refundError) throw refundError;
+
       // Update payment with refund info
       await supabase
         .from('paiements')
         .update({
-          montant_paye: (selectedPaiement.montant_paye || selectedPaiement.montant) - amount,
+          montant_paye: (sourcePaiement.montant_paye || sourcePaiement.montant) - amount,
           metadata: {
-            ...selectedPaiement.metadata,
+            ...sourcePaiement.metadata,
             remboursement: {
               montant: amount,
               date: new Date().toISOString(),
-              notes: refundNotes
+              notes: refundNotes,
+              mode: refundMode
             }
           }
         })
-        .eq('id', selectedPaiement.id);
+        .eq('id', refundPaiementId);
 
       toast({
         title: "Remboursement enregistré",
-        description: `${formatMontant(amount)} à rembourser au client`
+        description: `${formatMontant(amount)} à rembourser à ${sourceSouscripteur.nom_complet}`
       });
 
       setIsRefundDialogOpen(false);
@@ -413,11 +457,19 @@ const GestionPaiements = () => {
 
   const resetForms = () => {
     setSelectedPaiement(null);
-    setTargetPhone("");
+    setSourcePhone("");
+    setTargetAccount("");
     setTransferAmount("");
     setTransferNotes("");
+    setSourceSouscripteur(null);
+    setTargetSouscripteur(null);
+    setRefundSourcePhone("");
+    setRefundPaiementId("");
     setRefundAmount("");
     setRefundNotes("");
+    setRefundMode("Mobile Money");
+    setRefundNumero("");
+    setSourcePaiements([]);
     setSelectedSouscripteurId("");
     setConvertCount(1);
   };
@@ -804,33 +856,58 @@ const GestionPaiements = () => {
           </Dialog>
 
           {/* Transfer Dialog */}
-          <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
-            <DialogContent>
+          <Dialog open={isTransferDialogOpen} onOpenChange={(open) => { setIsTransferDialogOpen(open); if (!open) resetForms(); }}>
+            <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <ArrowRightLeft className="h-5 w-5 text-blue-600" />
                   Transférer un paiement
                 </DialogTitle>
                 <DialogDescription>
-                  Transférer tout ou partie d'un paiement vers un autre compte
+                  Transférer un montant d'un compte vers un autre
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
-                {selectedPaiement && (
-                  <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-sm">Paiement source: <strong>{formatMontant(selectedPaiement.montant_paye || selectedPaiement.montant)}</strong></p>
-                    <p className="text-xs text-muted-foreground">{selectedPaiement.souscripteurs?.nom_complet}</p>
-                  </div>
-                )}
+                {/* Source - Débiteur */}
                 <div className="space-y-2">
-                  <Label>Numéro de téléphone du destinataire</Label>
+                  <Label>Numéro téléphone du débiteur (source)</Label>
                   <Input
                     type="tel"
                     placeholder="Ex: 0759566087"
-                    value={targetPhone}
-                    onChange={(e) => setTargetPhone(e.target.value)}
+                    value={sourcePhone}
+                    onChange={(e) => {
+                      setSourcePhone(e.target.value);
+                      searchSouscripteur(e.target.value, 'source');
+                    }}
                   />
+                  {sourceSouscripteur && (
+                    <div className="bg-green-50 p-2 rounded border border-green-200">
+                      <p className="text-sm font-medium text-green-800">✓ {sourceSouscripteur.nom_complet}</p>
+                      <p className="text-xs text-green-600">ID: {sourceSouscripteur.id_unique}</p>
+                    </div>
+                  )}
                 </div>
+
+                {/* Destination - Bénéficiaire */}
+                <div className="space-y-2">
+                  <Label>Numéro de compte du bénéficiaire (destination)</Label>
+                  <Input
+                    type="text"
+                    placeholder="Ex: AC-2025-000123 ou téléphone"
+                    value={targetAccount}
+                    onChange={(e) => {
+                      setTargetAccount(e.target.value);
+                      searchSouscripteur(e.target.value, 'target');
+                    }}
+                  />
+                  {targetSouscripteur && (
+                    <div className="bg-blue-50 p-2 rounded border border-blue-200">
+                      <p className="text-sm font-medium text-blue-800">✓ {targetSouscripteur.nom_complet}</p>
+                      <p className="text-xs text-blue-600">ID: {targetSouscripteur.id_unique}</p>
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label>Montant à transférer (F CFA)</Label>
                   <Input
@@ -841,7 +918,7 @@ const GestionPaiements = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Notes (optionnel)</Label>
+                  <Label>Motif du transfert (optionnel)</Label>
                   <Textarea
                     placeholder="Raison du transfert..."
                     value={transferNotes}
@@ -851,7 +928,7 @@ const GestionPaiements = () => {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsTransferDialogOpen(false)}>Annuler</Button>
-                <Button onClick={handleTransfer} disabled={loading || !targetPhone || !transferAmount}>
+                <Button onClick={handleTransfer} disabled={loading || !sourceSouscripteur || !targetSouscripteur || !transferAmount}>
                   {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowRightLeft className="h-4 w-4 mr-2" />}
                   Transférer
                 </Button>
@@ -860,24 +937,56 @@ const GestionPaiements = () => {
           </Dialog>
 
           {/* Refund Dialog */}
-          <Dialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
-            <DialogContent>
+          <Dialog open={isRefundDialogOpen} onOpenChange={(open) => { setIsRefundDialogOpen(open); if (!open) resetForms(); }}>
+            <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <ArrowDownLeft className="h-5 w-5 text-red-600" />
                   Effectuer un remboursement
                 </DialogTitle>
                 <DialogDescription>
-                  Rembourser tout ou partie du montant payé
+                  Sélectionnez le paiement source et le montant à rembourser
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
-                {selectedPaiement && (
-                  <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-sm">Montant payé: <strong>{formatMontant(selectedPaiement.montant_paye || selectedPaiement.montant)}</strong></p>
-                    <p className="text-xs text-muted-foreground">{selectedPaiement.souscripteurs?.nom_complet}</p>
+                {/* Source - Souscripteur */}
+                <div className="space-y-2">
+                  <Label>Numéro téléphone du souscripteur</Label>
+                  <Input
+                    type="tel"
+                    placeholder="Ex: 0759566087"
+                    value={refundSourcePhone}
+                    onChange={(e) => {
+                      setRefundSourcePhone(e.target.value);
+                      searchSouscripteur(e.target.value, 'source');
+                    }}
+                  />
+                  {sourceSouscripteur && (
+                    <div className="bg-muted p-2 rounded">
+                      <p className="text-sm font-medium">✓ {sourceSouscripteur.nom_complet}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sélection du paiement source */}
+                {sourcePaiements.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Paiement source à rembourser</Label>
+                    <Select value={refundPaiementId} onValueChange={setRefundPaiementId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner le paiement" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sourcePaiements.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.reference} - {formatMontant(p.montant_paye || p.montant)} ({new Date(p.date_paiement || p.created_at).toLocaleDateString('fr-FR')})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
+
                 <div className="space-y-2">
                   <Label>Montant à rembourser (F CFA)</Label>
                   <Input
@@ -887,6 +996,33 @@ const GestionPaiements = () => {
                     onChange={(e) => setRefundAmount(e.target.value)}
                   />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Mode de remboursement</Label>
+                    <Select value={refundMode} onValueChange={setRefundMode}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Mobile Money">Mobile Money</SelectItem>
+                        <SelectItem value="Wave">Wave</SelectItem>
+                        <SelectItem value="Orange Money">Orange Money</SelectItem>
+                        <SelectItem value="Virement">Virement bancaire</SelectItem>
+                        <SelectItem value="Espèces">Espèces</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Numéro de compte</Label>
+                    <Input
+                      placeholder="Numéro du compte"
+                      value={refundNumero}
+                      onChange={(e) => setRefundNumero(e.target.value)}
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label>Motif du remboursement</Label>
                   <Textarea
@@ -895,16 +1031,17 @@ const GestionPaiements = () => {
                     onChange={(e) => setRefundNotes(e.target.value)}
                   />
                 </div>
+
                 <div className="bg-yellow-50 p-3 rounded-lg flex items-start gap-2">
                   <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
                   <p className="text-sm text-yellow-800">
-                    Le remboursement sera enregistré. Le paiement effectif au client doit être fait manuellement.
+                    Le remboursement sera enregistré. Le paiement effectif doit être fait manuellement.
                   </p>
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsRefundDialogOpen(false)}>Annuler</Button>
-                <Button variant="destructive" onClick={handleRefund} disabled={loading || !refundAmount}>
+                <Button variant="destructive" onClick={handleRefund} disabled={loading || !sourceSouscripteur || !refundPaiementId || !refundAmount}>
                   {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowDownLeft className="h-4 w-4 mr-2" />}
                   Rembourser
                 </Button>
