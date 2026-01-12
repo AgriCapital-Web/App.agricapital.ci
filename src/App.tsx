@@ -38,13 +38,11 @@ const queryClient = new QueryClient();
 // Composant pour détecter le domaine et rediriger
 const DomainRouter = () => {
   const [isClientDomain, setIsClientDomain] = useState<boolean | null>(null);
-  const [routeType, setRouteType] = useState<'client' | 'admin' | null>(null);
 
   useEffect(() => {
     const hostname = window.location.hostname;
-    const pathname = window.location.pathname;
     
-    // Vérifier si c'est le sous-domaine pay ou client
+    // Vérifier si c'est le sous-domaine pay uniquement
     const isPayDomain = 
       hostname === 'pay.agricapital.ci' || 
       hostname === 'client.agricapital.ci' ||
@@ -53,33 +51,15 @@ const DomainRouter = () => {
       hostname.startsWith('client.') ||
       hostname.startsWith('abonne.');
     
-    // Vérifier si c'est une route portail abonné sur le domaine principal
-    // Support pour les accents et sans accents
-    const isClientRoute = 
-      pathname.startsWith('/pay') ||
-      pathname.startsWith('/client') ||
-      pathname.startsWith('/abonne') ||
-      pathname.startsWith('/abonn%C3%A9') ||
-      decodeURIComponent(pathname).startsWith('/abonné');
-    
-    if (isPayDomain) {
-      setIsClientDomain(true);
-      setRouteType('client');
-    } else if (isClientRoute) {
-      setIsClientDomain(false);
-      setRouteType('client');
-    } else {
-      setIsClientDomain(false);
-      setRouteType('admin');
-    }
+    setIsClientDomain(isPayDomain);
   }, []);
 
   // Attendre la détection du domaine
-  if (routeType === null) {
+  if (isClientDomain === null) {
     return null;
   }
 
-  // Si c'est le domaine client (pay.agricapital.ci), afficher le portail abonné
+  // Si c'est le domaine client (pay.agricapital.ci), afficher uniquement le portail souscripteur
   if (isClientDomain) {
     return (
       <Routes>
@@ -88,7 +68,7 @@ const DomainRouter = () => {
     );
   }
 
-  // Sinon, afficher l'application de gestion normale avec toutes les routes
+  // Sinon, afficher l'application de gestion normale (CRM) - SANS routes /pay, /client, /abonne
   return (
     <Routes>
       {/* Public routes */}
@@ -98,16 +78,6 @@ const DomainRouter = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/account-request" element={<AccountRequest />} />
       <Route path="/create-super-admin" element={<CreateSuperAdmin />} />
-      
-      {/* Client Portal routes - accessible via /pay, /client, /abonne sur n'importe quel domaine */}
-      <Route path="/pay" element={<ClientPortal />} />
-      <Route path="/pay/*" element={<ClientPortal />} />
-      <Route path="/client" element={<ClientPortal />} />
-      <Route path="/client/*" element={<ClientPortal />} />
-      <Route path="/abonne" element={<ClientPortal />} />
-      <Route path="/abonne/*" element={<ClientPortal />} />
-      <Route path="/abonné" element={<ClientPortal />} />
-      <Route path="/abonné/*" element={<ClientPortal />} />
       
       {/* Protected routes - Dashboard & Core */}
       <Route path="/dashboard" element={<Dashboard />} />
