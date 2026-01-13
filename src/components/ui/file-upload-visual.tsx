@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, X, Upload, FileText } from "lucide-react";
+
 
 interface FileUploadVisualProps {
   label: string;
@@ -25,6 +26,11 @@ export const FileUploadVisual = ({
 }: FileUploadVisualProps) => {
   const [preview, setPreview] = useState<string>(currentPreview || "");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Keep preview in sync when parent restores draft / navigates steps
+  useEffect(() => {
+    setPreview(currentPreview || "");
+  }, [currentPreview]);
 
   const handleFileSelect = (file: File | null) => {
     if (!file) return;

@@ -4,6 +4,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtime } from "@/hooks/useRealtime";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -106,7 +107,16 @@ const GestionPaiements = () => {
 
   const canManage = hasRole('super_admin') || hasRole('service_client') || hasRole('comptable');
 
-  // Fetch paiements with related data
+  // Realtime refresh: when a payment changes (webhooks / validation), refresh lists + stats
+  useRealtime({
+    table: 'paiements',
+    event: '*',
+    onChange: () => {
+      queryClient.invalidateQueries({ queryKey: ['gestion-paiements'] });
+      queryClient.invalidateQueries({ queryKey: ['souscripteurs-monnaie'] });
+    }
+  });
+
   const { data: paiements = [], isLoading, refetch } = useQuery({
     queryKey: ['gestion-paiements'],
     queryFn: async () => {
