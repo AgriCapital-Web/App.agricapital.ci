@@ -25,7 +25,7 @@ const Commissions = () => {
         .from("commissions")
         .select(`
           *,
-          user:profiles!commissions_user_id_fkey(nom_complet, telephone),
+          profile:profiles!commissions_profile_id_fkey(nom_complet, telephone),
           plantation:plantations(id_unique, nom_plantation)
         `)
         .order("date_calcul", { ascending: false });
@@ -42,7 +42,6 @@ const Commissions = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchCommissions();
   }, []);
@@ -51,12 +50,15 @@ const Commissions = () => {
 
   const handleValider = async (commissionId: string) => {
     try {
+      const { data: profileId, error: profileErr } = await (supabase as any).rpc("current_profile_id");
+      if (profileErr) throw profileErr;
+
       const { error } = await (supabase as any)
         .from("commissions")
         .update({
           statut: "valide",
           date_validation: new Date().toISOString(),
-          valide_par: (await supabase.auth.getUser()).data.user?.id,
+          valide_par: profileId,
         })
         .eq("id", commissionId);
 
@@ -75,7 +77,6 @@ const Commissions = () => {
       });
     }
   };
-
   const handleRejeter = async (commissionId: string) => {
     try {
       const { error } = await (supabase as any)
@@ -100,7 +101,7 @@ const Commissions = () => {
   };
 
   const filteredCommissions = commissions.filter((c) =>
-    c.user?.nom_complet?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.profile?.nom_complet?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.plantation?.id_unique?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.type_commission?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -244,7 +245,7 @@ const Commissions = () => {
                   filteredCommissions.map((commission) => (
                     <TableRow key={commission.id}>
                       <TableCell className="font-medium">
-                        {commission.user?.nom_complet}
+                        {commission.profile?.nom_complet}
                       </TableCell>
                       <TableCell className="font-mono text-sm">
                         {commission.plantation?.id_unique}
