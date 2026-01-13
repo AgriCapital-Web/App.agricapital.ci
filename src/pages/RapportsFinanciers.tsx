@@ -39,13 +39,13 @@ const RapportsFinanciers = () => {
     const [commissionsRes, regionsRes, departementsRes, equipesRes, usersRes, planteursRes, plantationsRes] = await Promise.all([
       (supabase as any).from("commissions").select(`
         *,
-        user:profiles!commissions_user_id_fkey(nom_complet, region_id),
+        profile:profiles!commissions_profile_id_fkey(id, nom_complet, equipe_id),
         plantation:plantations(id_unique, nom_plantation, region_id, departement_id, souscripteur_id)
       `).order("date_calcul", { ascending: false }),
       (supabase as any).from("regions").select("*"),
       (supabase as any).from("departements").select("*"),
       (supabase as any).from("equipes").select("*"),
-      (supabase as any).from("profiles").select("id, nom_complet"),
+      (supabase as any).from("profiles").select("id, nom_complet, equipe_id"),
       (supabase as any).from("souscripteurs").select("id"),
       (supabase as any).from("plantations").select("id, superficie_ha"),
     ]);
@@ -95,8 +95,8 @@ const RapportsFinanciers = () => {
   const filteredCommissions = commissions.filter((c: any) => {
     if (filtreRegion !== "all" && c.plantation?.region_id !== filtreRegion) return false;
     if (filtreDepartement !== "all" && c.plantation?.departement_id !== filtreDepartement) return false;
-    if (filtreEquipe !== "all" && c.user?.equipe !== filtreEquipe) return false;
-    if (filtreUser !== "all" && c.user_id !== filtreUser) return false;
+    if (filtreEquipe !== "all" && c.profile?.equipe_id !== filtreEquipe) return false;
+    if (filtreUser !== "all" && c.profile_id !== filtreUser) return false;
     return true;
   });
 
@@ -105,7 +105,7 @@ const RapportsFinanciers = () => {
       ["Date", "Commercial", "Plantation", "Type", "Montant Base", "Taux", "Commission", "Statut"],
       ...filteredCommissions.map((c: any) => [
         new Date(c.date_calcul).toLocaleDateString("fr-FR"),
-        c.user?.nom_complet || "N/A",
+        c.profile?.nom_complet || "N/A",
         c.plantation?.id_unique || "N/A",
         c.type_commission?.replace("_", " "),
         c.montant_base,
@@ -136,11 +136,11 @@ const RapportsFinanciers = () => {
   const groupByUser = () => {
     const grouped: { [key: string]: any } = {};
     commissions.forEach((c: any) => {
-      const userId = c.user_id;
+      const userId = c.profile_id;
       if (!grouped[userId]) {
         grouped[userId] = {
-          nom: c.user?.nom_complet || "N/A",
-          equipe: c.user?.equipe || "N/A",
+          nom: c.profile?.nom_complet || "N/A",
+          equipe: c.profile?.equipe_id || "N/A",
           total: 0,
           count: 0,
         };
@@ -154,7 +154,7 @@ const RapportsFinanciers = () => {
   const groupByEquipe = () => {
     const grouped: { [key: string]: any } = {};
     commissions.forEach((c: any) => {
-      const equipe = c.user?.equipe || "Sans équipe";
+      const equipe = c.profile?.equipe_id || "Sans équipe";
       if (!grouped[equipe]) {
         grouped[equipe] = { equipe, total: 0, count: 0 };
       }
@@ -298,7 +298,7 @@ const RapportsFinanciers = () => {
                         filteredCommissions.map((c: any) => (
                           <TableRow key={c.id}>
                             <TableCell>{new Date(c.date_calcul).toLocaleDateString("fr-FR")}</TableCell>
-                            <TableCell>{c.user?.nom_complet || "N/A"}</TableCell>
+                            <TableCell>{c.profile?.nom_complet || "N/A"}</TableCell>
                             <TableCell>{c.plantation?.id_unique || "N/A"}</TableCell>
                             <TableCell className="capitalize">{c.type_commission?.replace("_", " ")}</TableCell>
                             <TableCell>{formatMontant(c.montant_base)}</TableCell>

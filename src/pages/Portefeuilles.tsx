@@ -63,12 +63,15 @@ const Portefeuilles = () => {
 
   const handleApprouverRetrait = async (retraitId: string, montant: number, portefeuilleId: string) => {
     try {
+      const { data: profileId, error: profileErr } = await (supabase as any).rpc("current_profile_id");
+      if (profileErr) throw profileErr;
+
       const { error: retraitError } = await (supabase as any)
         .from("retraits_portefeuille")
         .update({
           statut: "approuve",
           date_traitement: new Date().toISOString(),
-          traite_par: (await supabase.auth.getUser()).data.user?.id,
+          traite_par: profileId,
         })
         .eq("id", retraitId);
 
@@ -239,9 +242,9 @@ const Portefeuilles = () => {
                           <div className="text-muted-foreground">{portefeuille.user?.email}</div>
                         </div>
                       </TableCell>
-                      <TableCell className="font-bold text-green-600">
-                        {formatMontant(portefeuille.solde_commissions)}
-                      </TableCell>
+                       <TableCell className="font-bold text-primary">
+                         {formatMontant(portefeuille.solde_commissions)}
+                       </TableCell>
                       <TableCell>{formatMontant(portefeuille.total_gagne)}</TableCell>
                       <TableCell>{formatMontant(portefeuille.total_retire)}</TableCell>
                       <TableCell>
