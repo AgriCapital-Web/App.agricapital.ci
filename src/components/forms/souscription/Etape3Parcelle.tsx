@@ -3,11 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { MapPin, X, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { FileUploadVisual } from "@/components/ui/file-upload-visual";
 
 const InteractiveMap = lazy(() => import("@/components/maps/InteractiveMap"));
+
 
 interface Etape3Props {
   formData: any;
@@ -19,7 +20,7 @@ export const Etape3Parcelle = ({ formData, updateFormData }: Etape3Props) => {
   const [regions, setRegions] = useState<any[]>([]);
   const [departements, setDepartements] = useState<any[]>([]);
   const [sousPrefectures, setSousPrefectures] = useState<any[]>([]);
-  const [previews, setPreviews] = useState<{[key: string]: string}>({});
+
 
   useEffect(() => {
     fetchDistricts();
@@ -57,26 +58,13 @@ export const Etape3Parcelle = ({ formData, updateFormData }: Etape3Props) => {
     setSousPrefectures(data || []);
   };
 
-  const handleFileSelect = (key: string, file: File) => {
-    updateFormData({ [key]: file });
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviews({ ...previews, [key]: reader.result as string });
-    };
-    reader.readAsDataURL(file);
+  const handleFileChange = (field: string, file: File | null, preview: string) => {
+    updateFormData({
+      [field]: file,
+      [`${field}_preview`]: preview,
+    });
   };
 
-  const captureGPS = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        updateFormData({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          altitude: position.coords.altitude,
-        });
-      });
-    }
-  };
 
   const nombrePlants = formData.superficie_ha ? Math.round(formData.superficie_ha * 143) : 0;
 
@@ -272,7 +260,7 @@ export const Etape3Parcelle = ({ formData, updateFormData }: Etape3Props) => {
       <Card>
         <CardHeader>
           <CardTitle>Coordonnées GPS (Recommandé)</CardTitle>
-          <CardDescription>Cliquez sur la carte pour placer la parcelle ou utilisez "Ma position"</CardDescription>
+          <CardDescription>Cliquez sur la carte pour placer la parcelle (les coordonnées se remplissent automatiquement)</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Suspense fallback={
@@ -288,40 +276,18 @@ export const Etape3Parcelle = ({ formData, updateFormData }: Etape3Props) => {
                 updateFormData({
                   latitude: lat.toFixed(6),
                   longitude: lng.toFixed(6),
-                  altitude: alt?.toFixed(2) || formData.altitude
+                  altitude: alt?.toFixed(2) || formData.altitude,
                 });
               }}
               height="300px"
             />
           </Suspense>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="longitude">Longitude</Label>
-              <Input
-                id="longitude"
-                type="number"
-                step="any"
-                value={formData.longitude || ""}
-                onChange={(e) => updateFormData({ longitude: e.target.value })}
-                placeholder="Ex: -6.4502"
-                readOnly
-                className="bg-muted"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="altitude">Altitude (m)</Label>
-              <Input
-                id="altitude"
-                type="number"
-                step="any"
-                value={formData.altitude || ""}
-                onChange={(e) => updateFormData({ altitude: e.target.value })}
-                placeholder="Automatique"
-              />
-            </div>
-          </div>
+          {(formData.latitude && formData.longitude) && (
+            <p className="text-sm text-muted-foreground">
+              Position sélectionnée : {formData.latitude}, {formData.longitude}{formData.altitude ? ` (alt: ${formData.altitude}m)` : ""}
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -330,89 +296,35 @@ export const Etape3Parcelle = ({ formData, updateFormData }: Etape3Props) => {
           <CardTitle>Photos de la parcelle (3 obligatoires)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Vue générale *</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect('photo_1_file', file);
-              }}
-              required
-            />
-            {previews.photo_1_file && (
-              <div className="relative mt-2">
-                <img src={previews.photo_1_file} alt="Aperçu photo 1" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ photo_1_file: null });
-                    setPreviews({ ...previews, photo_1_file: "" });
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
+          <FileUploadVisual
+            label="Vue générale *"
+            field="photo_1_file"
+            accept="image/*"
+            required
+            currentFile={formData.photo_1_file || null}
+            currentPreview={formData.photo_1_file_preview || ""}
+            onFileChange={handleFileChange}
+          />
 
-          <div className="space-y-2">
-            <Label>Vue délimitée (limites visibles) *</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect('photo_2_file', file);
-              }}
-              required
-            />
-            {previews.photo_2_file && (
-              <div className="relative mt-2">
-                <img src={previews.photo_2_file} alt="Aperçu photo 2" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ photo_2_file: null });
-                    setPreviews({ ...previews, photo_2_file: "" });
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
+          <FileUploadVisual
+            label="Vue délimitée (limites visibles) *"
+            field="photo_2_file"
+            accept="image/*"
+            required
+            currentFile={formData.photo_2_file || null}
+            currentPreview={formData.photo_2_file_preview || ""}
+            onFileChange={handleFileChange}
+          />
 
-          <div className="space-y-2">
-            <Label>Vue alternative (autre angle) *</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect('photo_3_file', file);
-              }}
-              required
-            />
-            {previews.photo_3_file && (
-              <div className="relative mt-2">
-                <img src={previews.photo_3_file} alt="Aperçu photo 3" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ photo_3_file: null });
-                    setPreviews({ ...previews, photo_3_file: "" });
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
+          <FileUploadVisual
+            label="Vue alternative (autre angle) *"
+            field="photo_3_file"
+            accept="image/*"
+            required
+            currentFile={formData.photo_3_file || null}
+            currentPreview={formData.photo_3_file_preview || ""}
+            onFileChange={handleFileChange}
+          />
         </CardContent>
       </Card>
     </div>
