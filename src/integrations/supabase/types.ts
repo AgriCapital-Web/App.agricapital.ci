@@ -103,6 +103,50 @@ export type Database = {
           },
         ]
       }
+      backups_historique: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          format: string | null
+          id: string
+          nom: string
+          tables_incluses: Json | null
+          taille_octets: number | null
+          type_backup: string | null
+          url_stockage: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          format?: string | null
+          id?: string
+          nom: string
+          tables_incluses?: Json | null
+          taille_octets?: number | null
+          type_backup?: string | null
+          url_stockage?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          format?: string | null
+          id?: string
+          nom?: string
+          tables_incluses?: Json | null
+          taille_octets?: number | null
+          type_backup?: string | null
+          url_stockage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backups_historique_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       champs_personnalises: {
         Row: {
           actif: boolean | null
@@ -269,6 +313,74 @@ export type Database = {
           valeur?: string
         }
         Relationships: []
+      }
+      cotitulaires: {
+        Row: {
+          civilite: string | null
+          created_at: string
+          date_delivrance: string | null
+          date_naissance: string | null
+          id: string
+          nom: string
+          numero_piece: string | null
+          photo_cni_recto_url: string | null
+          photo_cni_verso_url: string | null
+          photo_profil_url: string | null
+          prenoms: string | null
+          relation: string | null
+          souscripteur_id: string | null
+          telephone: string | null
+          type_piece: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          civilite?: string | null
+          created_at?: string
+          date_delivrance?: string | null
+          date_naissance?: string | null
+          id?: string
+          nom: string
+          numero_piece?: string | null
+          photo_cni_recto_url?: string | null
+          photo_cni_verso_url?: string | null
+          photo_profil_url?: string | null
+          prenoms?: string | null
+          relation?: string | null
+          souscripteur_id?: string | null
+          telephone?: string | null
+          type_piece?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          civilite?: string | null
+          created_at?: string
+          date_delivrance?: string | null
+          date_naissance?: string | null
+          id?: string
+          nom?: string
+          numero_piece?: string | null
+          photo_cni_recto_url?: string | null
+          photo_cni_verso_url?: string | null
+          photo_profil_url?: string | null
+          prenoms?: string | null
+          relation?: string | null
+          souscripteur_id?: string | null
+          telephone?: string | null
+          type_piece?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotitulaires_souscripteur_id_fkey"
+            columns: ["souscripteur_id"]
+            isOneToOne: false
+            referencedRelation: "souscripteurs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       departements: {
         Row: {
