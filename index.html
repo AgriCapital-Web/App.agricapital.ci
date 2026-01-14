@@ -71,7 +71,18 @@
     </script>
   </head>
   <body>
+    <script>
+      // SPA deep-link support when the host serves 404.html for unknown routes
+      (function () {
+        const redirect = sessionStorage.getItem('redirect');
+        if (redirect) {
+          sessionStorage.removeItem('redirect');
+          history.replaceState(null, '', redirect);
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+

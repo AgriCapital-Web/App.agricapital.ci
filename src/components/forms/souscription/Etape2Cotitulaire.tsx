@@ -1,11 +1,9 @@
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import FileUpload from "@/components/ui/file-upload";
-import { X } from "lucide-react";
+import { FileUploadVisual } from "@/components/ui/file-upload-visual";
 
 interface Etape2Props {
   formData: any;
@@ -13,17 +11,11 @@ interface Etape2Props {
 }
 
 export const Etape2Cotitulaire = ({ formData, updateFormData }: Etape2Props) => {
-  const [pieceRectoPreview, setPieceRectoPreview] = useState<string>("");
-  const [pieceVersoPreview, setPieceVersoPreview] = useState<string>("");
-  const [photoPreview, setPhotoPreview] = useState<string>("");
-
-  const handleFileSelect = (file: File, field: string, setPreview: (url: string) => void) => {
-    updateFormData({ [field]: file });
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+  const handleFileChange = (field: string, file: File | null, preview: string) => {
+    updateFormData({
+      [`${field}_file`]: file,
+      [`${field}_preview`]: preview,
+    });
   };
 
   return (
@@ -174,93 +166,36 @@ export const Etape2Cotitulaire = ({ formData, updateFormData }: Etape2Props) => 
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Photo Pièce - Recto *</Label>
-              <FileUpload
-                onFileSelect={(file) => handleFileSelect(file, 'cotit_photo_cni_recto_file', setPieceRectoPreview)}
-                accept="image/*"
-                label="Choisir photo recto"
-                currentFile={formData.cotit_photo_cni_recto_file?.name}
-                onRemove={() => {
-                  updateFormData({ cotit_photo_cni_recto_file: null });
-                  setPieceRectoPreview("");
-                }}
-              />
-              {pieceRectoPreview && (
-                <div className="relative mt-2">
-                  <img src={pieceRectoPreview} alt="Aperçu recto" className="w-full h-40 object-cover rounded-lg border" />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      updateFormData({ cotit_photo_cni_recto_file: null });
-                      setPieceRectoPreview("");
-                    }}
-                    className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label>Photo Pièce - Verso *</Label>
-              <FileUpload
-                onFileSelect={(file) => handleFileSelect(file, 'cotit_photo_cni_verso_file', setPieceVersoPreview)}
-                accept="image/*"
-                label="Choisir photo verso"
-                currentFile={formData.cotit_photo_cni_verso_file?.name}
-                onRemove={() => {
-                  updateFormData({ cotit_photo_cni_verso_file: null });
-                  setPieceVersoPreview("");
-                }}
-              />
-              {pieceVersoPreview && (
-                <div className="relative mt-2">
-                  <img src={pieceVersoPreview} alt="Aperçu verso" className="w-full h-40 object-cover rounded-lg border" />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      updateFormData({ cotit_photo_cni_verso_file: null });
-                      setPieceVersoPreview("");
-                    }}
-                    className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Photo Profil *</Label>
-            <FileUpload
-              onFileSelect={(file) => handleFileSelect(file, 'cotit_photo_profil_file', setPhotoPreview)}
+            <FileUploadVisual
+              label="Photo Pièce - Recto *"
+              field="cotit_photo_cni_recto"
               accept="image/*"
-              label="Choisir photo profil"
-              currentFile={formData.cotit_photo_profil_file?.name}
-              onRemove={() => {
-                updateFormData({ cotit_photo_profil_file: null });
-                setPhotoPreview("");
-              }}
+              required
+              currentFile={formData.cotit_photo_cni_recto_file || null}
+              currentPreview={formData.cotit_photo_cni_recto_preview || ""}
+              onFileChange={handleFileChange}
             />
-            {photoPreview && (
-              <div className="relative mt-2">
-                <img src={photoPreview} alt="Aperçu profil" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ cotit_photo_profil_file: null });
-                    setPhotoPreview("");
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
+
+            <FileUploadVisual
+              label="Photo Pièce - Verso *"
+              field="cotit_photo_cni_verso"
+              accept="image/*"
+              required
+              currentFile={formData.cotit_photo_cni_verso_file || null}
+              currentPreview={formData.cotit_photo_cni_verso_preview || ""}
+              onFileChange={handleFileChange}
+            />
           </div>
+
+          <FileUploadVisual
+            label="Photo Profil *"
+            field="cotit_photo_profil"
+            accept="image/*"
+            required
+            currentFile={formData.cotit_photo_profil_file || null}
+            currentPreview={formData.cotit_photo_profil_preview || ""}
+            onFileChange={handleFileChange}
+          />
         </CardContent>
       </Card>
 
