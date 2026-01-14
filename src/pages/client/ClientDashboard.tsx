@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
+import { useRealtime } from "@/hooks/useRealtime";
 
 interface ClientDashboardProps {
   souscripteur: any;
@@ -34,9 +36,9 @@ interface ClientDashboardProps {
 }
 
 const ClientDashboard = ({ 
-  souscripteur, 
-  plantations, 
-  paiements, 
+  souscripteur: initialSouscripteur, 
+  plantations: initialPlantations, 
+  paiements: initialPaiements, 
   onPayment, 
   onPortfolio,
   onHistory,
@@ -44,6 +46,30 @@ const ClientDashboard = ({
   onLogout 
 }: ClientDashboardProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [souscripteur, setSouscripteur] = useState(initialSouscripteur);
+  const [plantations, setPlantations] = useState(initialPlantations);
+  const [paiements, setPaiements] = useState(initialPaiements);
+
+  // Realtime updates pour les paiements
+  useRealtime({
+    table: 'paiements',
+    filter: `souscripteur_id=eq.${souscripteur?.id}`,
+    onInsert: (newPaiement) => {
+      setPaiements(prev => [newPaiement, ...prev]);
+    },
+    onUpdate: (updatedPaiement) => {
+      setPaiements(prev => prev.map(p => p.id === updatedPaiement.id ? updatedPaiement : p));
+    }
+  });
+
+  // Realtime updates pour le souscripteur (statut)
+  useRealtime({
+    table: 'souscripteurs',
+    filter: `id=eq.${souscripteur?.id}`,
+    onUpdate: (updatedSouscripteur) => {
+      setSouscripteur(prev => ({ ...prev, ...updatedSouscripteur }));
+    }
+  });
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
