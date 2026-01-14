@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Eye, X } from "lucide-react";
+import { FileUploadVisual } from "@/components/ui/file-upload-visual";
 
 // Validation helpers
 const validatePhone = (phone: string) => /^\d{10}$/.test(phone);
@@ -24,10 +24,14 @@ export const Etape1Souscripteur = ({ formData, updateFormData }: Etape1Props) =>
   const [departements, setDepartements] = useState<any[]>([]);
   const [sousPrefectures, setSousPrefectures] = useState<any[]>([]);
   
-  const [photoRectoPreview, setPhotoRectoPreview] = useState<string>("");
-  const [photoVersoPreview, setPhotoVersoPreview] = useState<string>("");
-  const [photoProfilPreview, setPhotoProfilPreview] = useState<string>("");
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const handleFileChange = (field: string, file: File | null, preview: string) => {
+    updateFormData({
+      [`${field}_file`]: file,
+      [`${field}_preview`]: preview,
+    });
+  };
 
   const validateField = (field: string, value: any) => {
     const errors = { ...validationErrors };
@@ -127,38 +131,6 @@ export const Etape1Souscripteur = ({ formData, updateFormData }: Etape1Props) =>
     }
   }, [formData.departement_id]);
 
-  const handleFileChange = (field: string, file: File | null) => {
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const preview = reader.result as string;
-      if (field === "photo_piece_recto") {
-        setPhotoRectoPreview(preview);
-        updateFormData({ photo_piece_recto_file: file, photo_piece_recto_preview: preview });
-      } else if (field === "photo_piece_verso") {
-        setPhotoVersoPreview(preview);
-        updateFormData({ photo_piece_verso_file: file, photo_piece_verso_preview: preview });
-      } else if (field === "photo_profil") {
-        setPhotoProfilPreview(preview);
-        updateFormData({ photo_profil_file: file, photo_profil_preview: preview });
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const clearFile = (field: string) => {
-    if (field === "photo_piece_recto") {
-      setPhotoRectoPreview("");
-      updateFormData({ photo_piece_recto_file: null, photo_piece_recto_preview: null });
-    } else if (field === "photo_piece_verso") {
-      setPhotoVersoPreview("");
-      updateFormData({ photo_piece_verso_file: null, photo_piece_verso_preview: null });
-    } else if (field === "photo_profil") {
-      setPhotoProfilPreview("");
-      updateFormData({ photo_profil_file: null, photo_profil_preview: null });
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -298,110 +270,35 @@ export const Etape1Souscripteur = ({ formData, updateFormData }: Etape1Props) =>
             </div>
           </div>
 
-          {/* Photo Recto */}
-          <div className="space-y-2">
-            <Label>Photo de la pièce - Recto *</Label>
-            {!photoRectoPreview ? (
-              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
-                <Input
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  onChange={(e) => handleFileChange("photo_piece_recto", e.target.files?.[0] || null)}
-                  className="hidden"
-                  id="recto-upload"
-                />
-                <Label htmlFor="recto-upload" className="cursor-pointer">
-                  <div className="space-y-2">
-                    <div className="text-4xl">📎</div>
-                    <p className="text-sm text-muted-foreground">Glisser-déposer ou cliquer pour parcourir</p>
-                    <p className="text-xs text-muted-foreground">JPG, PNG max 5MB</p>
-                  </div>
-                </Label>
-              </div>
-            ) : (
-              <div className="relative border rounded-lg p-4">
-                <img src={photoRectoPreview} alt="Recto" className="w-full h-48 object-contain" />
-                <div className="flex gap-2 mt-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => window.open(photoRectoPreview)}>
-                    <Eye className="h-4 w-4 mr-1" /> Visualiser
-                  </Button>
-                  <Button type="button" variant="destructive" size="sm" onClick={() => clearFile("photo_piece_recto")}>
-                    <X className="h-4 w-4 mr-1" /> Supprimer
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          <FileUploadVisual
+            label="Photo de la pièce - Recto"
+            field="photo_piece_recto"
+            accept="image/*"
+            required
+            currentFile={formData.photo_piece_recto_file || null}
+            currentPreview={formData.photo_piece_recto_preview || ""}
+            onFileChange={handleFileChange}
+          />
 
-          {/* Photo Verso */}
-          <div className="space-y-2">
-            <Label>Photo de la pièce - Verso *</Label>
-            {!photoVersoPreview ? (
-              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
-                <Input
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  onChange={(e) => handleFileChange("photo_piece_verso", e.target.files?.[0] || null)}
-                  className="hidden"
-                  id="verso-upload"
-                />
-                <Label htmlFor="verso-upload" className="cursor-pointer">
-                  <div className="space-y-2">
-                    <div className="text-4xl">📎</div>
-                    <p className="text-sm text-muted-foreground">Glisser-déposer ou cliquer pour parcourir</p>
-                    <p className="text-xs text-muted-foreground">JPG, PNG max 5MB</p>
-                  </div>
-                </Label>
-              </div>
-            ) : (
-              <div className="relative border rounded-lg p-4">
-                <img src={photoVersoPreview} alt="Verso" className="w-full h-48 object-contain" />
-                <div className="flex gap-2 mt-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => window.open(photoVersoPreview)}>
-                    <Eye className="h-4 w-4 mr-1" /> Visualiser
-                  </Button>
-                  <Button type="button" variant="destructive" size="sm" onClick={() => clearFile("photo_piece_verso")}>
-                    <X className="h-4 w-4 mr-1" /> Supprimer
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          <FileUploadVisual
+            label="Photo de la pièce - Verso"
+            field="photo_piece_verso"
+            accept="image/*"
+            required
+            currentFile={formData.photo_piece_verso_file || null}
+            currentPreview={formData.photo_piece_verso_preview || ""}
+            onFileChange={handleFileChange}
+          />
 
-          {/* Photo Profil */}
-          <div className="space-y-2">
-            <Label>Photo profil (Portrait) *</Label>
-            {!photoProfilPreview ? (
-              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
-                <Input
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  onChange={(e) => handleFileChange("photo_profil", e.target.files?.[0] || null)}
-                  className="hidden"
-                  id="profil-upload"
-                />
-                <Label htmlFor="profil-upload" className="cursor-pointer">
-                  <div className="space-y-2">
-                    <div className="text-4xl">👤</div>
-                    <p className="text-sm text-muted-foreground">Photo portrait du souscripteur</p>
-                    <p className="text-xs text-muted-foreground">JPG, PNG max 5MB</p>
-                  </div>
-                </Label>
-              </div>
-            ) : (
-              <div className="relative border rounded-lg p-4">
-                <img src={photoProfilPreview} alt="Profil" className="w-full h-48 object-contain" />
-                <div className="flex gap-2 mt-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => window.open(photoProfilPreview)}>
-                    <Eye className="h-4 w-4 mr-1" /> Visualiser
-                  </Button>
-                  <Button type="button" variant="destructive" size="sm" onClick={() => clearFile("photo_profil")}>
-                    <X className="h-4 w-4 mr-1" /> Supprimer
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          <FileUploadVisual
+            label="Photo profil (Portrait)"
+            field="photo_profil"
+            accept="image/*"
+            required
+            currentFile={formData.photo_profil_file || null}
+            currentPreview={formData.photo_profil_preview || ""}
+            onFileChange={handleFileChange}
+          />
         </CardContent>
       </Card>
 
