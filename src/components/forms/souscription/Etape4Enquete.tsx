@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X } from "lucide-react";
+import { FileUploadVisual } from "@/components/ui/file-upload-visual";
 
 interface Etape4Props {
   formData: any;
@@ -12,15 +11,11 @@ interface Etape4Props {
 }
 
 export const Etape4Enquete = ({ formData, updateFormData }: Etape4Props) => {
-  const [previews, setPreviews] = useState<{[key: string]: string}>({});
-
-  const handleFileSelect = (key: string, file: File) => {
-    updateFormData({ [key]: file });
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviews({ ...previews, [key]: reader.result as string });
-    };
-    reader.readAsDataURL(file);
+  const handleFileChange = (field: string, file: File | null, preview: string) => {
+    updateFormData({
+      [`${field}_file`]: file,
+      [`${field}_preview`]: preview,
+    });
   };
 
   return (
@@ -112,60 +107,26 @@ export const Etape4Enquete = ({ formData, updateFormData }: Etape4Props) => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Photo CNI *</Label>
-            <Input
-              type="file"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FileUploadVisual
+              label="Photo CNI *"
+              field="chef_photo_cni"
               accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect('chef_photo_cni_file', file);
-              }}
               required
+              currentFile={formData.chef_photo_cni_file || null}
+              currentPreview={formData.chef_photo_cni_preview || ""}
+              onFileChange={handleFileChange}
             />
-            {previews.chef_photo_cni_file && (
-              <div className="relative mt-2">
-                <img src={previews.chef_photo_cni_file} alt="Aperçu CNI" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ chef_photo_cni_file: null });
-                    setPreviews({ ...previews, chef_photo_cni_file: "" });
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label>Photo profil *</Label>
-            <Input
-              type="file"
+            <FileUploadVisual
+              label="Photo profil *"
+              field="chef_photo_profil"
               accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect('chef_photo_profil_file', file);
-              }}
               required
+              currentFile={formData.chef_photo_profil_file || null}
+              currentPreview={formData.chef_photo_profil_preview || ""}
+              onFileChange={handleFileChange}
             />
-            {previews.chef_photo_profil_file && (
-              <div className="relative mt-2">
-                <img src={previews.chef_photo_profil_file} alt="Aperçu profil" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ chef_photo_profil_file: null });
-                    setPreviews({ ...previews, chef_photo_profil_file: "" });
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="flex items-center space-x-2">
@@ -258,60 +219,26 @@ export const Etape4Enquete = ({ formData, updateFormData }: Etape4Props) => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Photo CNI *</Label>
-            <Input
-              type="file"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FileUploadVisual
+              label="Photo CNI *"
+              field="temoin1_photo_cni"
               accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect('temoin1_photo_cni_file', file);
-              }}
               required
+              currentFile={formData.temoin1_photo_cni_file || null}
+              currentPreview={formData.temoin1_photo_cni_preview || ""}
+              onFileChange={handleFileChange}
             />
-            {previews.temoin1_photo_cni_file && (
-              <div className="relative mt-2">
-                <img src={previews.temoin1_photo_cni_file} alt="Aperçu CNI" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ temoin1_photo_cni_file: null });
-                    setPreviews({ ...previews, temoin1_photo_cni_file: "" });
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label>Photo profil *</Label>
-            <Input
-              type="file"
+            <FileUploadVisual
+              label="Photo profil *"
+              field="temoin1_photo_profil"
               accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect('temoin1_photo_profil_file', file);
-              }}
               required
+              currentFile={formData.temoin1_photo_profil_file || null}
+              currentPreview={formData.temoin1_photo_profil_preview || ""}
+              onFileChange={handleFileChange}
             />
-            {previews.temoin1_photo_profil_file && (
-              <div className="relative mt-2">
-                <img src={previews.temoin1_photo_profil_file} alt="Aperçu profil" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ temoin1_photo_profil_file: null });
-                    setPreviews({ ...previews, temoin1_photo_profil_file: "" });
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="flex items-center space-x-2">
@@ -404,60 +331,26 @@ export const Etape4Enquete = ({ formData, updateFormData }: Etape4Props) => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Photo CNI *</Label>
-            <Input
-              type="file"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FileUploadVisual
+              label="Photo CNI *"
+              field="temoin2_photo_cni"
               accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect('temoin2_photo_cni_file', file);
-              }}
               required
+              currentFile={formData.temoin2_photo_cni_file || null}
+              currentPreview={formData.temoin2_photo_cni_preview || ""}
+              onFileChange={handleFileChange}
             />
-            {previews.temoin2_photo_cni_file && (
-              <div className="relative mt-2">
-                <img src={previews.temoin2_photo_cni_file} alt="Aperçu CNI" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ temoin2_photo_cni_file: null });
-                    setPreviews({ ...previews, temoin2_photo_cni_file: "" });
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label>Photo profil *</Label>
-            <Input
-              type="file"
+            <FileUploadVisual
+              label="Photo profil *"
+              field="temoin2_photo_profil"
               accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect('temoin2_photo_profil_file', file);
-              }}
               required
+              currentFile={formData.temoin2_photo_profil_file || null}
+              currentPreview={formData.temoin2_photo_profil_preview || ""}
+              onFileChange={handleFileChange}
             />
-            {previews.temoin2_photo_profil_file && (
-              <div className="relative mt-2">
-                <img src={previews.temoin2_photo_profil_file} alt="Aperçu profil" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ temoin2_photo_profil_file: null });
-                    setPreviews({ ...previews, temoin2_photo_profil_file: "" });
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="flex items-center space-x-2">
@@ -473,60 +366,18 @@ export const Etape4Enquete = ({ formData, updateFormData }: Etape4Props) => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Attestation et photo de groupe</CardTitle>
+          <CardTitle>Attestation d'absence de litiges</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-start space-x-2">
             <Checkbox
-              id="absence_litiges"
-              checked={formData.absence_litiges}
-              onCheckedChange={(checked) => updateFormData({ absence_litiges: checked })}
+              id="attestation_absence_litiges"
+              checked={formData.attestation_absence_litiges}
+              onCheckedChange={(checked) => updateFormData({ attestation_absence_litiges: checked })}
             />
-            <Label htmlFor="absence_litiges">
-              Je certifie qu'il n'existe aucun litige foncier *
+            <Label htmlFor="attestation_absence_litiges" className="text-sm leading-tight">
+              Je certifie que cette parcelle ne fait l'objet d'aucun litige foncier et que je suis habilité(e) à la mettre à disposition pour ce projet
             </Label>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="date_attestation">Date attestation *</Label>
-            <Input
-              id="date_attestation"
-              type="date"
-              value={formData.date_attestation}
-              onChange={(e) => updateFormData({ date_attestation: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Photo de groupe (OBLIGATOIRE) *</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect('photo_groupe_file', file);
-              }}
-              required
-            />
-            {previews.photo_groupe_file && (
-              <div className="relative mt-2">
-                <img src={previews.photo_groupe_file} alt="Aperçu groupe" className="w-full h-40 object-cover rounded-lg border" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData({ photo_groupe_file: null });
-                    setPreviews({ ...previews, photo_groupe_file: "" });
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/80"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Souscripteur + Co-titulaire + Chef + Témoin1 + Témoin2 + Technico-commercial
-            </p>
           </div>
         </CardContent>
       </Card>

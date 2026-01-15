@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import Planteurs from "./pages/Souscriptions";
 import PlanteurDetail from "./pages/PlanteurDetail";
 import Plantations from "./pages/Plantations";
+import Parcelles from "./pages/Parcelles";
 import GestionPaiements from "./pages/GestionPaiements";
 import Utilisateurs from "./pages/Utilisateurs";
 import RapportsFinanciers from "./pages/RapportsFinanciers";
@@ -88,6 +89,7 @@ const DomainRouter = () => {
       <Route path="/planteur/:id" element={<PlanteurDetail />} />
       <Route path="/planteur/:id/historique" element={<HistoriqueComplet />} />
       <Route path="/plantations" element={<Plantations />} />
+      <Route path="/parcelles" element={<Parcelles />} />
       <Route path="/nouvelle-souscription" element={<NouvelleSouscription />} />
       
       {/* Paiements - nouvelle page unifiée */}
