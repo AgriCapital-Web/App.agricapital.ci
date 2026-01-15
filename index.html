@@ -19,8 +19,21 @@
     <meta name="msapplication-TileColor" content="#00643C" />
     <meta name="msapplication-tap-highlight" content="no" />
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
+    <!-- PWA Manifest - Dynamique selon le domaine -->
+    <link rel="manifest" id="pwa-manifest" href="/manifest.json" />
+    <script>
+      // PWA Manifest dynamique selon le domaine
+      (function() {
+        var hostname = window.location.hostname;
+        var manifestLink = document.getElementById('pwa-manifest');
+        if (hostname.includes('pay.') || hostname.includes('portail')) {
+          manifestLink.href = '/manifest-portail.json';
+          document.querySelector('meta[name="theme-color"]').content = '#059669';
+        } else if (hostname.includes('app.') || hostname.includes('crm')) {
+          manifestLink.href = '/manifest-crm.json';
+        }
+      })();
+    </script>
     
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="/icons/icon-152x152.png" />

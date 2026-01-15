@@ -28,11 +28,10 @@ const redIcon = new L.Icon({
 });
 
 interface LocationPickerProps {
-  position: [number, number] | null;
   setPosition: (pos: [number, number]) => void;
 }
 
-const LocationPicker = ({ position, setPosition }: LocationPickerProps) => {
+const LocationPicker = ({ setPosition }: LocationPickerProps) => {
   useMapEvents({
     click(e) {
       setPosition([e.latlng.lat, e.latlng.lng]);
@@ -41,7 +40,11 @@ const LocationPicker = ({ position, setPosition }: LocationPickerProps) => {
   return null;
 };
 
-const FlyToLocation = ({ position }: { position: [number, number] | null }) => {
+interface FlyToLocationProps {
+  position: [number, number] | null;
+}
+
+const FlyToLocation = ({ position }: FlyToLocationProps) => {
   const map = useMap();
   
   useEffect(() => {
@@ -80,7 +83,7 @@ const InteractiveMapComponent = ({
     initialPosition || null
   );
   const [loading, setLoading] = useState(false);
-  const mapRef = useRef<L.Map>(null);
+  const mapRef = useRef<L.Map | null>(null);
 
   // Centre par défaut : Daloa, Côte d'Ivoire
   const defaultCenter: [number, number] = [6.8774, -6.4502];
@@ -146,7 +149,7 @@ const InteractiveMapComponent = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {mode === 'pick' && <LocationPicker position={position} setPosition={handlePositionChange} />}
+        {mode === 'pick' && <LocationPicker setPosition={handlePositionChange} />}
         <FlyToLocation position={position} />
 
         {/* Marqueur de position sélectionnée */}
