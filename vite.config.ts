@@ -15,31 +15,8 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "icons/*.png"],
-      manifest: {
-        name: "AgriCapital CRM",
-        short_name: "AgriCapital",
-        description: "Système de Gestion des Planteurs & Plantations",
-        theme_color: "#16a34a",
-        background_color: "#ffffff",
-        display: "standalone",
-        orientation: "portrait-primary",
-        start_url: "/",
-        icons: [
-          {
-            src: "/icons/icon-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "maskable any"
-          },
-          {
-            src: "/icons/icon-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable any"
-          }
-        ]
-      },
+      includeAssets: ["favicon.ico", "icons/*.png", "logo-agricapital.png"],
+      manifest: false, // Désactiver le manifest généré - on utilise des manifests dynamiques
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [

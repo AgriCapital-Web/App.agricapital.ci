@@ -126,5 +126,41 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Better touch targets on mobile */
+  @media (max-width: 640px) {
+    button, 
+    a, 
+    [role="button"],
+    input[type="checkbox"],
+    input[type="radio"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    input, 
+    select, 
+    textarea {
+      font-size: 16px !important; /* Prevent iOS zoom on focus */
+    }
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
