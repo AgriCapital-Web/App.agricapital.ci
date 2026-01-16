@@ -124,7 +124,7 @@ export const Etape0Offre = ({ formData, updateFormData }: Etape0Props) => {
       <Card>
         <CardHeader>
           <CardTitle>Choisissez votre Offre</CardTitle>
-          <CardDescription>Sélectionnez l'offre qui correspond au profil du partenaire abonné</CardDescription>
+          <CardDescription>Sélectionnez l'offre qui correspond au profil du partenaire souscripteur</CardDescription>
         </CardHeader>
         <CardContent>
           <RadioGroup
