@@ -97,7 +97,7 @@ const ClientPortfolio = ({ souscripteur, plantations, paiements, onBack }: Clien
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6 max-w-4xl">
-        {/* Profil Partenaire Abonné */}
+        {/* Profil Partenaire Souscripteur */}
         <Card className="overflow-hidden">
           <div className="bg-gradient-to-r from-primary to-primary/80 text-white p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -339,7 +339,7 @@ const ClientPortfolio = ({ souscripteur, plantations, paiements, onBack }: Clien
                               {format(new Date(paiement.created_at), "dd/MM/yyyy", { locale: fr })}
                             </TableCell>
                             <TableCell className="text-sm">
-                              {paiement.type_paiement === 'droit_acces' ? 'Droit d\'accès' : 'Contribution'}
+                              {paiement.type_paiement === 'droit_acces' || paiement.type_paiement === 'DA' ? 'Droit d\'accès' : 'Redevance mensuel'}
                             </TableCell>
                             <TableCell className="text-right font-medium">
                               {formatMontant(paiement.montant_paye || paiement.montant_theorique)}
@@ -368,7 +368,7 @@ const ClientPortfolio = ({ souscripteur, plantations, paiements, onBack }: Clien
                     <span className="font-bold text-primary">{formatMontant(stats.totalDAVerse)}</span>
                   </div>
                   <div className="flex justify-between py-3 border-b">
-                    <span className="text-muted-foreground">Total Contributions versées</span>
+                    <span className="text-muted-foreground">Total Redevances versées</span>
                     <span className="font-bold text-green-600">{formatMontant(stats.totalContributions)}</span>
                   </div>
                   <div className="flex justify-between py-3 border-b">

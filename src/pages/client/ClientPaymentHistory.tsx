@@ -66,7 +66,7 @@ const ClientPaymentHistory = ({ souscripteur, plantations, paiements, onBack }: 
     const rows = filteredPaiements.map(p => [
       p.reference || "-",
       p.date_paiement ? format(new Date(p.date_paiement), "dd/MM/yyyy HH:mm") : format(new Date(p.created_at), "dd/MM/yyyy HH:mm"),
-      p.type_paiement === "DA" ? "Droit d'Accès" : "Redevance mensuel",
+      p.type_paiement === "DA" ? "Droit d'Accès" : "Redevance mensuelle",
       p.plantations?.nom_plantation || p.plantations?.id_unique || "-",
       p.montant_paye || p.montant,
       p.statut === "valide" ? "Validé" : p.statut === "echec" ? "Échoué" : "En attente",
@@ -204,7 +204,7 @@ const ClientPaymentHistory = ({ souscripteur, plantations, paiements, onBack }: 
                 <SelectContent>
                   <SelectItem value="all">Tous les types</SelectItem>
                   <SelectItem value="DA">Droit d'Accès</SelectItem>
-                  <SelectItem value="REDEVANCE">Redevance mensuel</SelectItem>
+                  <SelectItem value="REDEVANCE">Redevance mensuelle</SelectItem>
                 </SelectContent>
               </Select>
 

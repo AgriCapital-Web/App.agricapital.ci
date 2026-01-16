@@ -712,7 +712,7 @@ const GestionPaiements = () => {
                     Souscripteurs avec monnaie disponible
                   </CardTitle>
                   <CardDescription>
-                    Les montants excédentaires payés par les abonnés peuvent être convertis en jours/mois de redevance
+                    Les montants excédentaires payés par les souscripteurs peuvent être convertis en jours/mois de redevance
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

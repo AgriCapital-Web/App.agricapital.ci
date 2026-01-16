@@ -733,15 +733,8 @@ const Parcelles = () => {
                     <InteractiveMap
                       mode="pick"
                       height="300px"
-                      onLocationSelect={(lat, lng) => setFormData({ ...formData, latitude: lat, longitude: lng })}
-                      initialPosition={formData.latitude && formData.longitude ? {
-                        lat: formData.latitude,
-                        lng: formData.longitude
-                      } : undefined}
-                    />
-                  </Suspense>
-                        lng: formData.longitude
-                      } : undefined}
+                      onPositionChange={(lat, lng) => setFormData({ ...formData, latitude: lat, longitude: lng })}
+                      position={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : null}
                     />
                   </Suspense>
                   

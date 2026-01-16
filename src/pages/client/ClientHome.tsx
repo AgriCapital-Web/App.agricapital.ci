@@ -23,7 +23,7 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
     return () => clearInterval(timer);
   }, []);
 
-  // Mettre à jour le manifest et SEO pour le portail abonné
+  // Mettre à jour le manifest et SEO pour le portail souscripteur
   useEffect(() => {
     document.title = "Portail Souscripteur | AgriCapital - Accédez à votre espace partenaire";
     
@@ -53,7 +53,7 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
 
     setLoading(true);
     try {
-      // Rechercher le partenaire abonné
+      // Rechercher le partenaire souscripteur
       const { data: sousData, error: sousError } = await supabase
         .from("souscripteurs")
         .select(`
@@ -118,7 +118,7 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
   };
 
   const handleWhatsApp = () => {
-    const message = encodeURIComponent("Bonjour AgriCapital,\n\nJe souhaite créer mon compte partenaire abonné pour accéder au portail.\n\nMerci de m'accompagner dans cette démarche.");
+    const message = encodeURIComponent("Bonjour AgriCapital,\n\nJe souhaite créer mon compte partenaire souscripteur pour accéder au portail.\n\nMerci de m'accompagner dans cette démarche.");
     window.open(`https://wa.me/2250564551717?text=${message}`, '_blank');
   };
 
@@ -143,7 +143,7 @@ const ClientHome = ({ onLogin }: ClientHomeProps) => {
           <div className="container mx-auto flex flex-col items-center justify-center">
             <img 
               src={logoWhite} 
-              alt="AgriCapital - Portail Abonné" 
+              alt="AgriCapital - Portail Souscripteur" 
               className="h-16 sm:h-24 md:h-32 object-contain drop-shadow-lg"
             />
             <h1 className="text-white text-lg sm:text-xl md:text-2xl font-bold mt-2 sm:mt-4 tracking-wide">
