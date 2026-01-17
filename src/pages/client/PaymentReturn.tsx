@@ -16,119 +16,235 @@ const PaymentReturn = ({ onBack }: PaymentReturnProps) => {
   const [paiement, setPaiement] = useState<any>(null);
   const [checkCount, setCheckCount] = useState(0);
 
+  // Support multiple parameter formats from different payment providers
   const reference = searchParams.get('reference') || searchParams.get('ref');
-  const fedapayStatus = searchParams.get('status');
-  const transactionId = searchParams.get('id') || searchParams.get('transaction_id');
+  const urlStatus = searchParams.get('status');
+  const transactionId = searchParams.get('id') || searchParams.get('transaction_id') || searchParams.get('transactionId');
+  const paymentProvider = searchParams.get('provider') || 'auto';
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
+      console.log('PaymentReturn: Checking payment status', { reference, transactionId, urlStatus, paymentProvider });
+      
       if (!reference && !transactionId) {
+        console.log('PaymentReturn: No reference or transactionId found');
         setStatus('pending');
         return;
       }
 
       try {
-        // 1) Si on a un transactionId, on vérifie côté serveur (ne pas faire confiance au status d'URL)
-        if (transactionId) {
-          const { data: verifyData, error: verifyError } = await supabase.functions.invoke(
-            'fedapay-verify-transaction',
-            { body: { transactionId } }
-          );
+        // 1. Rechercher le paiement en base
+        let query = supabase.from('paiements').select(`
+          *,
+          plantations (nom_plantation, id_unique),
+          souscripteurs (nom_complet, telephone)
+        `);
 
-          if (verifyError) throw verifyError;
+        if (reference) {
+          query = query.eq('reference', reference);
+        } else if (transactionId) {
+          query = query.eq('fedapay_transaction_id', transactionId);
+        }
 
-          const t = verifyData?.transaction;
-          const tStatus = (t?.status || t?.state || '').toString().toLowerCase();
-          const resolvedReference = reference || t?.merchant_reference || t?.reference || t?.custom_metadata?.reference;
+        const { data: dbPaiement, error: dbError } = await query.maybeSingle();
+        
+        if (dbError) {
+          console.error('PaymentReturn: DB error', dbError);
+          throw dbError;
+        }
 
-          // 2) Récupérer le paiement en base
-          let query = supabase.from('paiements').select(`
-            *,
-            plantations (nom_plantation, id_unique),
-            souscripteurs (nom_complet, telephone)
-          `);
+        console.log('PaymentReturn: Found payment', dbPaiement);
 
-          if (resolvedReference) {
-            query = query.eq('reference', resolvedReference);
-          } else {
-            query = query.eq('fedapay_transaction_id', transactionId);
+        if (dbPaiement) {
+          setPaiement(dbPaiement);
+
+          // Si déjà validé ou échoué, afficher le statut
+          if (dbPaiement.statut === 'valide') {
+            setStatus('success');
+            return;
           }
-
-          const { data: dbPaiement, error: dbError } = await query.maybeSingle();
-          if (dbError) throw dbError;
-
-          if (dbPaiement) {
-            setPaiement(dbPaiement);
-
-            const isApproved = tStatus === 'approved';
-            const isFailed = tStatus === 'declined' || tStatus === 'canceled' || tStatus === 'cancelled' || tStatus === 'failed' || tStatus === 'refused';
-
-            if (isApproved || isFailed) {
-              const { error: updateError } = await supabase
-                .from('paiements')
-                .update({
-                  statut: isApproved ? 'valide' : 'echec',
-                  fedapay_transaction_id: transactionId,
-                  montant_paye: isApproved ? (t?.amount ?? dbPaiement.montant) : 0,
-                  date_paiement: isApproved ? new Date().toISOString() : null,
-                })
-                .eq('id', dbPaiement.id);
-
-              if (!updateError) {
-                const updated = {
-                  ...dbPaiement,
-                  statut: isApproved ? 'valide' : 'echec',
-                  fedapay_transaction_id: transactionId,
-                  montant_paye: isApproved ? (t?.amount ?? dbPaiement.montant) : 0,
-                  date_paiement: isApproved ? new Date().toISOString() : null,
-                };
-                setPaiement(updated);
-                setStatus(isApproved ? 'success' : 'error');
-                return;
-              }
-            }
-
-            setStatus('pending');
+          
+          if (dbPaiement.statut === 'echec' || dbPaiement.statut === 'rejete') {
+            setStatus('error');
             return;
           }
 
-          // paiement introuvable => pending
-          setStatus('pending');
-          return;
-        }
+          // 2. Vérifier le statut côté serveur si on a un transactionId
+          if (transactionId) {
+            // Déterminer le provider depuis les metadata ou auto-detect
+            const metadata = dbPaiement.metadata as Record<string, any> | null;
+            const provider = metadata?.payment_provider || paymentProvider;
+            
+            let verifyResult = null;
+            
+            if (provider === 'kkiapay' || provider === 'auto') {
+              // Essayer KKiaPay d'abord
+              try {
+                const { data, error } = await supabase.functions.invoke('kkiapay-verify-transaction', {
+                  body: { transactionId }
+                });
+                
+                if (!error && data?.success) {
+                  verifyResult = {
+                    provider: 'kkiapay',
+                    status: data.transaction?.status?.toLowerCase(),
+                    isSuccess: data.transaction?.isPaymentSuccessful,
+                    amount: data.transaction?.amount
+                  };
+                }
+              } catch (e) {
+                console.log('PaymentReturn: KKiaPay verify failed, trying FedaPay', e);
+              }
+            }
+            
+            if (!verifyResult && (provider === 'fedapay' || provider === 'auto')) {
+              // Essayer FedaPay
+              try {
+                const { data, error } = await supabase.functions.invoke('fedapay-verify-transaction', {
+                  body: { transactionId }
+                });
+                
+                if (!error && data?.success) {
+                  const t = data.transaction;
+                  const tStatus = (t?.status || t?.state || '').toString().toLowerCase();
+                  verifyResult = {
+                    provider: 'fedapay',
+                    status: tStatus,
+                    isSuccess: tStatus === 'approved',
+                    amount: t?.amount
+                  };
+                }
+              } catch (e) {
+                console.log('PaymentReturn: FedaPay verify failed', e);
+              }
+            }
+            
+            console.log('PaymentReturn: Verify result', verifyResult);
+            
+            if (verifyResult) {
+              const isApproved = verifyResult.isSuccess || verifyResult.status === 'success' || verifyResult.status === 'approved';
+              const isFailed = verifyResult.status === 'failed' || verifyResult.status === 'declined' || 
+                               verifyResult.status === 'canceled' || verifyResult.status === 'cancelled' || 
+                               verifyResult.status === 'refused';
+              
+              if (isApproved || isFailed) {
+                const newStatus = isApproved ? 'valide' : 'echec';
+                
+                const { error: updateError } = await supabase
+                  .from('paiements')
+                  .update({
+                    statut: newStatus,
+                    fedapay_transaction_id: transactionId,
+                    montant_paye: isApproved ? (verifyResult.amount ?? dbPaiement.montant) : 0,
+                    date_paiement: isApproved ? new Date().toISOString() : null,
+                    metadata: {
+                      ...(dbPaiement.metadata as Record<string, any> || {}),
+                      verified_provider: verifyResult.provider,
+                      verified_at: new Date().toISOString()
+                    }
+                  })
+                  .eq('id', dbPaiement.id);
 
-        // 3) Sinon, fallback: recherche par référence (attendre le webhook)
-        const { data, error } = await supabase
-          .from('paiements')
-          .select(`
-            *,
-            plantations (nom_plantation, id_unique),
-            souscripteurs (nom_complet, telephone)
-          `)
-          .eq('reference', reference)
-          .maybeSingle();
-
-        if (error) throw error;
-
-        if (data) {
-          setPaiement(data);
-          if (data.statut === 'valide') setStatus('success');
-          else if (data.statut === 'echec' || data.statut === 'rejete') setStatus('error');
-          else {
-            if (checkCount < 10) setTimeout(() => setCheckCount(c => c + 1), 2500);
-            setStatus('pending');
+                if (!updateError) {
+                  const updated = {
+                    ...dbPaiement,
+                    statut: newStatus,
+                    fedapay_transaction_id: transactionId,
+                    montant_paye: isApproved ? (verifyResult.amount ?? dbPaiement.montant) : 0,
+                    date_paiement: isApproved ? new Date().toISOString() : null,
+                  };
+                  setPaiement(updated);
+                  
+                  // Si paiement DA validé, mettre à jour la superficie activée
+                  if (isApproved && dbPaiement.type_paiement === 'DA' && dbPaiement.plantation_id) {
+                    await updatePlantationAfterDA(dbPaiement);
+                  }
+                  
+                  setStatus(isApproved ? 'success' : 'error');
+                  return;
+                }
+              }
+            }
           }
+          
+          // 3. Si le statut URL indique un succès, mettre à jour
+          if (urlStatus === 'success' || urlStatus === 'approved') {
+            const { error: updateError } = await supabase
+              .from('paiements')
+              .update({
+                statut: 'valide',
+                montant_paye: dbPaiement.montant,
+                date_paiement: new Date().toISOString(),
+              })
+              .eq('id', dbPaiement.id);
+
+            if (!updateError) {
+              const updated = {
+                ...dbPaiement,
+                statut: 'valide',
+                montant_paye: dbPaiement.montant,
+                date_paiement: new Date().toISOString(),
+              };
+              setPaiement(updated);
+              
+              // Si paiement DA validé, mettre à jour la superficie activée
+              if (dbPaiement.type_paiement === 'DA' && dbPaiement.plantation_id) {
+                await updatePlantationAfterDA(dbPaiement);
+              }
+              
+              setStatus('success');
+              return;
+            }
+          }
+
+          // Continuer à vérifier périodiquement
+          if (checkCount < 10) {
+            setTimeout(() => setCheckCount(c => c + 1), 2500);
+          }
+          setStatus('pending');
         } else {
+          // Paiement non trouvé
+          console.log('PaymentReturn: Payment not found in database');
           setStatus('pending');
         }
       } catch (error) {
-        console.error('Error checking payment:', error);
+        console.error('PaymentReturn: Error checking payment:', error);
         setStatus('pending');
       }
     };
 
     checkPaymentStatus();
-  }, [reference, transactionId, checkCount]);
+  }, [reference, transactionId, checkCount, urlStatus, paymentProvider]);
+
+  // Mettre à jour la plantation après paiement DA
+  const updatePlantationAfterDA = async (paiement: any) => {
+    try {
+      // Récupérer la plantation
+      const { data: plantation } = await supabase
+        .from('plantations')
+        .select('*')
+        .eq('id', paiement.plantation_id)
+        .single();
+      
+      if (plantation) {
+        const newSuperficieActivee = plantation.superficie_ha;
+        
+        await supabase
+          .from('plantations')
+          .update({
+            superficie_activee: newSuperficieActivee,
+            date_activation: new Date().toISOString(),
+            statut: 'active',
+            statut_global: 'actif'
+          })
+          .eq('id', paiement.plantation_id);
+          
+        console.log('PaymentReturn: Plantation updated after DA payment');
+      }
+    } catch (error) {
+      console.error('PaymentReturn: Error updating plantation after DA:', error);
+    }
+  };
 
   const formatMontant = (m: number) => {
     return new Intl.NumberFormat("fr-FR").format(m || 0) + " F CFA";
@@ -178,7 +294,7 @@ const PaymentReturn = ({ onBack }: PaymentReturnProps) => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Type</span>
-                      <span className="font-medium">{paiement.type_paiement}</span>
+                      <span className="font-medium">{paiement.type_paiement === 'DA' ? "Droit d'Accès" : 'Redevance mensuelle'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Référence</span>
