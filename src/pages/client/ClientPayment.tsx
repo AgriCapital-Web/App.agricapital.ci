@@ -93,6 +93,13 @@ const ClientPayment = ({ souscripteur, plantations, paiements, onBack }: ClientP
       console.log('KKiaPay payment success:', response);
       
       if (currentPaiementRef) {
+        // Récupérer le paiement pour avoir l'ID de plantation
+        const { data: paiementData } = await supabase
+          .from('paiements')
+          .select('*, plantations(*)')
+          .eq('reference', currentPaiementRef)
+          .maybeSingle();
+
         // Mettre à jour le paiement en base
         const { error } = await supabase
           .from('paiements')
@@ -100,8 +107,9 @@ const ClientPayment = ({ souscripteur, plantations, paiements, onBack }: ClientP
             statut: 'valide',
             fedapay_transaction_id: response.transactionId,
             date_paiement: new Date().toISOString(),
-            montant_paye: response.amount || 0,
+            montant_paye: response.amount || paiementData?.montant || 0,
             metadata: {
+              payment_provider: 'kkiapay',
               kkiapay_transaction_id: response.transactionId,
               method: response.method || null,
               fees: response.fees || 0,
@@ -112,6 +120,40 @@ const ClientPayment = ({ souscripteur, plantations, paiements, onBack }: ClientP
 
         if (error) {
           console.error('Error updating payment:', error);
+        } else {
+          // Si c'est un paiement DA, activer la plantation
+          if (paiementData && paiementData.type_paiement === 'DA' && paiementData.plantation_id) {
+            const plantation = paiementData.plantations;
+            if (plantation) {
+              await supabase
+                .from('plantations')
+                .update({
+                  superficie_activee: plantation.superficie_ha,
+                  date_activation: new Date().toISOString(),
+                  statut: 'active',
+                  statut_global: 'actif'
+                })
+                .eq('id', paiementData.plantation_id);
+              console.log('Plantation activated after DA payment');
+            }
+          }
+          
+          // Mettre à jour le total DA versé du souscripteur
+          if (paiementData && paiementData.type_paiement === 'DA' && paiementData.souscripteur_id) {
+            const { data: allDAPaiements } = await supabase
+              .from('paiements')
+              .select('montant_paye')
+              .eq('souscripteur_id', paiementData.souscripteur_id)
+              .eq('type_paiement', 'DA')
+              .eq('statut', 'valide');
+            
+            const totalDA = allDAPaiements?.reduce((sum, p) => sum + (p.montant_paye || 0), 0) || 0;
+            
+            await supabase
+              .from('souscripteurs')
+              .update({ total_da_verse: totalDA })
+              .eq('id', paiementData.souscripteur_id);
+          }
         }
       }
 
